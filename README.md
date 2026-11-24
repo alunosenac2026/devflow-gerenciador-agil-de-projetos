@@ -12,7 +12,7 @@
 
 ## Acesso local
 
-Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/). Nesta etapa a raiz retorna HTTP 403, pois ainda não há página inicial e a listagem está desativada. O [guia de ambiente](docs/ambiente.md) descreve a instalação local no XAMPP, o isolamento, a validação e a reversão.
+Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/) para criar e listar projetos. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) descreve a regra local usada pela API e os testes de isolamento.
 
 ## Persistência local
 
@@ -20,4 +20,4 @@ O DevFlow usa a instância dedicada MariaDB 10.4.32 em `127.0.0.1:3307`. Após i
 
 No ambiente acadêmico de referência, o provisionamento local concluiu a instalação de `devflow_test`, validou a persistência e criou `devflow` sem dados de teste. As configurações locais foram verificadas por metadados e permanecem protegidas por NTFS e ignoradas pelo Git.
 
-Para reexecutar os testes, use `C:/xampp/php/php.exe tests/persistencia.php` no PowerShell do usuário responsável. A primeira fatia da API e da interface será a criação e a listagem de projetos.
+Para reexecutar os testes, use `C:/xampp/php/php.exe tests/persistencia.php` e `C:/xampp/php/php.exe tests/projetos.php --integracao` no PowerShell do usuário responsável. Ambos usam o banco exclusivo de testes.

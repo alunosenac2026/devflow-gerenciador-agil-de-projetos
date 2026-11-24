@@ -180,6 +180,16 @@ Uma falha após o primeiro DDL pode deixar bancos, tabelas, contas ou concessõe
 
 O executor abre apenas `devflow_test` com `devflow_test_app` na porta `3307`. Os registros sintéticos usam uma transação revertida no final. O teste de acesso cruzado tenta apenas uma leitura sem linhas voltadas a `devflow` e exige recusa. A sequência pode avançar mesmo após rollback porque o contador de IDs é gerenciado pelo banco.
 
+## Rota de projetos
+
+Após validar a configuração do VirtualHost dedicada, insira a regra abaixo depois da rejeição de `Host` e antes da regra geral de bloqueio de URLs. Use o mesmo procedimento de backup e validação do Apache descrito acima.
+
+```apache
+RewriteRule ^/api/projetos$ /api/index.php [PT,L]
+```
+
+Na Sprint 03.1, a integração passou em `devflow_test`. Após reiniciar o Apache, o cadastro feito no navegador retornou HTTP 201 no log, apareceu na página e foi confirmado por uma nova consulta HTTP 200. Os caminhos privados testados permaneceram bloqueados em HTTP e HTTPS. A entrada pública da UC4 manteve HTTP 200.
+
 ### Resultado do incremento 02.3
 
 O provisionamento manual confirmou a identidade da instância dedicada e a disponibilidade dos nomes. A saída local registrou duas validações bem-sucedidas da persistência e a criação de `devflow` sem dados de teste. O teste independente foi confirmado pelo responsável pela execução local. O provisionamento não foi repetido para este registro.
