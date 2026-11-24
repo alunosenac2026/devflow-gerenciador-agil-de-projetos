@@ -17,6 +17,13 @@ Monólito modular em PHP 8.2 com Projetos, Tarefas e infraestrutura compartilhad
 
 ## Incrementos e aceite
 
+| Incremento da Sprint 02 | Progresso |
+|---|---|
+| 02.1 — Estrutura inicial | Concluído. Diretórios, regras do Git e exemplo de configuração local. |
+| 02.2 — Isolamento do Apache | VirtualHost aplicado no XAMPP de referência. Testes locais do 02.2C passaram e a entrada pública da UC4 preservou HTTP 200. O 02.2D documenta a reprodução, a reversão e as ressalvas no [guia de ambiente](docs/ambiente.md). |
+
+O teste por outro dispositivo da rede permanece pendente. A persistência, os CRUDs e o Kanban seguem planejados. A implementação do banco depende de autorização própria.
+
 | Prazo de 2026 | Entrega | Critério de aceite |
 |---|---|---|
 | Até 24/11 | Fechar contrato, confirmar ambiente e começar a persistência após autorização. | Confirmar PHP 8.2 com PDO no Apache, validar o esquema em banco vazio MariaDB 10.4.32 e demonstrar o isolamento local antes de disponibilizar a aplicação. |

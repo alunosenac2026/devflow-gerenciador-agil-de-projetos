@@ -64,6 +64,8 @@ As rotas POST e PATCH recebem um objeto JSON em UTF-8. Os limites são contados 
 
 ## Exposição no XAMPP
 
-A auditoria identificou raízes HTTP e HTTPS sob `htdocs`, onde está o checkout, e escuta em todas as interfaces IPv4 nas portas 80, 443 e 3306. O alcance pela rede e a entrega de arquivos por HTTP não foram verificados.
+No ambiente de referência, o DevFlow tem um VirtualHost vinculado a `127.0.0.1:8082`, com `public/` como raiz. Uma regra global bloqueia o caminho físico do checkout. A exceção para clientes locais existe apenas no VirtualHost dedicado, que exige o cabeçalho `Host` esperado, desativa listagem e overrides e limita as URLs às entradas previstas e aos assets permitidos.
 
-Para a configuração futura, restringir o DevFlow ao loopback, servir somente `public/` e bloquear o checkout pelo host padrão e por aliases, tanto em HTTP quanto em HTTPS. A alternativa a avaliar primeiro é manter o checkout atual, negar acesso à sua raiz e liberar somente `public/` para clientes locais em um endereço dedicado. Restringir o MariaDB a conexões locais e usar uma conta da aplicação com privilégios mínimos. Manter credenciais e logs em locais privados, com credenciais fora do Git. Validar host padrão, endereço do DevFlow, loopback e interfaces de rede conforme o [checklist](testes.md). A configuração e as URLs finais dependem da revisão do ambiente e da autorização para aplicá-las.
+Os testes locais confirmaram o bloqueio do checkout pelos hosts compartilhados HTTP e HTTPS e dos mapeamentos herdados na porta dedicada. A configuração aplicada, os resultados e o teste pendente a partir de outro dispositivo estão no [guia de ambiente](ambiente.md).
+
+As rotas REST ainda dependem de implementação e de ajuste explícito da lista de URLs permitidas, seguido de novos testes de isolamento. Restringir o MariaDB a conexões locais e usar uma conta com privilégios mínimos continuam sendo tarefas do incremento de persistência. Manter credenciais e logs fora de `public/` e credenciais fora do Git.
