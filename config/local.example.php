@@ -7,7 +7,7 @@ return [
     ],
     'database' => [
         'host' => '127.0.0.1',
-        'port' => 3306,
+        'port' => 3307,
         'name' => 'devflow',
         'user' => 'devflow_app',
         'password' => 'SENHA_FICTICIA_APENAS_EXEMPLO',

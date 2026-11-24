@@ -4,6 +4,10 @@ Use dados descartáveis em um banco exclusivo de testes. Execute as verificaçõ
 
 ## Banco e ambiente
 
+Após o provisionamento local, execute o teste de integração da persistência conforme o [guia de ambiente](ambiente.md#reexecutar-os-testes). O executor usa somente o banco de testes e a conta restrita. Cobre Unicode, valores padrão, timestamps, recusas por chave estrangeira, valores inválidos de prioridade e estado, ordenação, rollback e permissões. A validação HTTP da API faz parte do incremento seguinte.
+
+No incremento 02.3, a execução local reportou sucesso nos testes de persistência em `devflow_test` e a criação de `devflow` sem dados de teste. Consulte o [registro do ambiente](ambiente.md#resultado-do-incremento-023) para a evidência e a conferência dos arquivos locais.
+
 - [ ] Confirmar PHP 8.2 com `pdo_mysql` sob o Apache, MariaDB 10.4.32 e configuração efetiva do XAMPP. Aplicar os scripts SQL num banco de teste vazio para verificar compatibilidade.
 - [ ] Criar o esquema em banco vazio e verificar conexão com `utf8mb4`.
 - [ ] Confirmar que o banco impede tarefas órfãs e a exclusão de projetos com tarefas.

@@ -1,6 +1,6 @@
 # Ambiente local do DevFlow
 
-O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. A interface, a API REST, a conexão e o esquema do banco seguem planejados. Este procedimento se destina ao ambiente acadêmico local.
+O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. O 02.3 fornece a infraestrutura de persistência descrita abaixo. A interface e a API REST seguem planejadas. Este procedimento se destina ao ambiente acadêmico local.
 
 ## Pré-requisitos verificados
 
@@ -9,7 +9,7 @@ O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.
 | Windows com XAMPP | Apache em sessão interativa, administrado pelo XAMPP Control Panel. |
 | Apache 2.4.58 Win64 | Sintaxe e VirtualHosts verificados. A versão descreve o ambiente acadêmico inspecionado. |
 | PHP 8.2.12 | Verificado na CLI e sob o Apache, com PDO, `pdo_mysql` e `mbstring`. |
-| MariaDB 10.4.32 | Versão identificada no binário do XAMPP. A validação do esquema e o isolamento do banco ficam para a etapa de persistência. |
+| MariaDB 10.4.32 | Versão confirmada na primeira partida da instância dedicada, com escuta exclusiva em `127.0.0.1:3307`. |
 
 A configuração usa os módulos de autorização do Apache, `mod_rewrite` e `mod_proxy`. O módulo PHP do XAMPP executa a entrada pública. Quando `mod_userdir` estiver carregado, ele é desabilitado no VirtualHost dedicado. Para verificar os módulos, use `httpd -M` com os mesmos argumentos de raiz e configuração da validação abaixo.
 
@@ -108,3 +108,80 @@ $httpd = Join-Path $apacheRoot 'bin/httpd.exe'
 Nos testes HTTPS locais, a validação do certificado foi desativada para verificar o comportamento HTTP. O teste a partir de **outro dispositivo da rede** permanece pendente. A verificação da UC4 cobriu a resposta da entrada pública, com os testes funcionais completos e os fluxos de escrita pendentes.
 
 No host compartilhado, `/webalizer/` retornou 403 e `/examples` retornou 503. O Apache registrou falha de conexão com o destino AJP local na porta 8009, sem escuta observada. Como esses caminhos não tinham resposta registrada antes da aplicação, os resultados ficam como observações, sem regressão confirmada.
+
+## Persistência na instância dedicada
+
+O procedimento pressupõe uma instância dedicada já inicializada e uma conta administrativa local configurada. A instância do DevFlow usa `127.0.0.1:3307`. A porta `3306` pertence à instância compartilhada. Nos exemplos, ajuste a raiz do XAMPP para o executável PHP e os caminhos documentados conforme a instalação aprovada.
+
+### Partida e encerramento
+
+Em um PowerShell dedicado, mantenha o servidor em primeiro plano durante o uso:
+
+```powershell
+& 'C:/xampp/mysql/bin/mysqld.exe' '--defaults-file=C:/DevFlow-MariaDB-10.4/my.ini' --console
+```
+
+Confira no `netstat -ano -p tcp` que a única escuta na porta `3307` é `127.0.0.1:3307` e que o PID corresponde ao arquivo `mariadb.pid` da instância dedicada. Para desligá-la, use o comando abaixo e digite a senha administrativa no prompt local, ou pressione `Ctrl+C` somente no terminal que iniciou essa instância. Reconfirme que a porta `3307` deixou de escutar.
+
+```powershell
+& 'C:/xampp/mysql/bin/mysqladmin.exe' --no-defaults --protocol=TCP `
+    --host=127.0.0.1 --port=3307 --user=root --password --shutdown-timeout=30 shutdown
+```
+
+### Instalação e configuração local
+
+Execute o bloco na raiz do repositório, em um PowerShell local. Digite a senha administrativa existente e duas senhas distintas, com pelo menos 16 bytes cada, para as contas de aplicação. A entrada é mascarada e o JSON segue diretamente por stdin ao processo PHP. Evite executar o procedimento em uma sessão com registro de comandos ou inspeção do fluxo de entrada. Mantenha as configurações geradas em uma pasta com acesso local restrito.
+
+```powershell
+& {
+    $OutputEncoding = [Text.UTF8Encoding]::new($false)
+    $entradas = @{}
+    try {
+        foreach ($item in @(
+            @{ Chave='admin'; Prompt='Senha administrativa existente' }
+            @{ Chave='app'; Prompt='Nova senha de devflow_app' }
+            @{ Chave='testes'; Prompt='Nova senha de devflow_test_app' }
+        )) {
+            $segredo = Read-Host $item.Prompt -AsSecureString
+            try {
+                $credencial = [Net.NetworkCredential]::new('', $segredo)
+                $entradas[$item.Chave] = $credencial.Password
+            } finally {
+                $segredo.Dispose()
+                $credencial = $null
+            }
+        }
+        $entradas | ConvertTo-Json -Compress |
+            & 'C:/xampp/php/php.exe' database/provisionar.php
+        if ($LASTEXITCODE -ne 0) { throw 'Provisionamento interrompido.' }
+    } finally {
+        $entradas.Clear()
+    }
+}
+```
+
+O instalador exige a versão, porta, bind, datadir e conta administrativa do ambiente dedicado antes de qualquer DDL. Confere colisões de bancos, contas e arquivos locais. Aplica o schema e executa os testes funcionais primeiro em `devflow_test`. Só depois cria `devflow` vazio e verifica as permissões dos dois usuários. Cada conta recebe apenas `SELECT`, `INSERT`, `UPDATE` e `DELETE` nas próprias tabelas `projetos` e `tarefas`. O administrador é usado apenas durante a instalação.
+
+O provisionador e as conexões de aplicação e testes exigem `STRICT_TRANS_TABLES` ou `STRICT_ALL_TABLES` em `@@SESSION.sql_mode`. A verificação apenas lê o modo da sessão. Se a condição falhar, revise o ambiente antes de prosseguir.
+
+### Se o provisionamento parar
+
+Uma falha após o primeiro DDL pode deixar bancos, tabelas, contas ou concessões criadas, mesmo com código de saída diferente de zero. Uma falha na etapa final pode deixar apenas um dos arquivos locais ou um arquivo incompleto. O instalador bloqueia colisões e preserva os objetos e arquivos existentes.
+
+1. Anote a etapa sanitizada exibida no terminal e mantenha o estado existente.
+2. Confirme a identidade da instância dedicada em `127.0.0.1:3307`. Em seguida, confira somente por leitura quais bancos, tabelas, contas e privilégios previstos já existem. Verifique a presença de `config/local.php` e `config/local.test.php` sem exibir seu conteúdo ou material de autenticação.
+3. Compare o inventário com o schema e com a etapa reportada. Se houver estado parcial ou objetos de origem incerta, defina a recuperação antes de repetir. O procedimento não exclui nem sobrescreve automaticamente bancos, tabelas, contas ou arquivos.
+
+### Reexecutar os testes
+
+```powershell
+& 'C:/xampp/php/php.exe' tests/persistencia.php
+```
+
+O executor abre apenas `devflow_test` com `devflow_test_app` na porta `3307`. Os registros sintéticos usam uma transação revertida no final. O teste de acesso cruzado tenta apenas uma leitura sem linhas voltadas a `devflow` e exige recusa. A sequência pode avançar mesmo após rollback porque o contador de IDs é gerenciado pelo banco.
+
+### Resultado do incremento 02.3
+
+O provisionamento manual confirmou a identidade da instância dedicada e a disponibilidade dos nomes. A saída local registrou duas validações bem-sucedidas da persistência e a criação de `devflow` sem dados de teste. O teste independente foi confirmado pelo responsável pela execução local. O provisionamento não foi repetido para este registro.
+
+`config/local.php` e `config/local.test.php` existem como arquivos regulares e herdam acesso somente para o usuário responsável, SYSTEM e Administradores locais. O Git ignora os dois caminhos. A conferência usou apenas metadados e DACLs.
