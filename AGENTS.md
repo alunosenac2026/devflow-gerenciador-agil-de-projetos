@@ -13,6 +13,7 @@ Responda e documente em português brasileiro. Leia o pedido, este arquivo e os 
 
 - Use PDO e consultas parametrizadas. Valide entradas no servidor e mantenha restrições de integridade no banco. Renderize dados do usuário como texto na interface.
 - Mantenha configuração local, credenciais, logs e código interno fora da raiz pública efetiva. Verifique os caminhos alternativos do Apache antes de propor mudanças. Solicite aprovação antes de aplicar uma configuração estrutural.
-- Mantenha a aplicação acessível apenas pela máquina local. Revise requisições de escrita contra origens indevidas, tratamento de erros e exposição de detalhes internos.
+- Revise o isolamento local do checkout em HTTP e HTTPS e do banco. Verifique host padrão, host da aplicação e interfaces de rede. Nesta etapa, registre as medidas propostas e aguarde autorização antes de alterar o XAMPP ou o banco.
+- Revise a validação de origem e de `Content-Type` nas escritas conforme o [contrato da API](docs/arquitetura.md). Revise também o tratamento de erros e a exposição de detalhes internos.
 - Em auditorias, avalie entradas, SQL Injection, XSS, CSRF, erros, credenciais, dependências e organização. Examine autenticação, autorização e sessões quando aplicáveis. Registre severidade, arquivo, evidência, impacto e correção. Distinga hipóteses de achados confirmados.
-- Use banco exclusivo para testes de escrita e dados descartáveis. Consulte [a estratégia de testes](docs/testes.md) e relate o que foi efetivamente executado.
+- Revise a parametrização de todas as consultas que recebem valores variáveis. Use banco exclusivo para testes de escrita e dados descartáveis. Use a [matriz de cobertura](docs/testes.md) e relate o que foi efetivamente executado por requisito.
