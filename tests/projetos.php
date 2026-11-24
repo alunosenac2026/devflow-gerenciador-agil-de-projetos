@@ -50,14 +50,40 @@ function verificarContratoProjetos(): void
             'POST', $rota, $origem, $json,
             json_encode(['nome' => 'Exemplo', 'descricao' => str_repeat('á', 2001)]), 422, 'descricao',
         ],
+        ['GET', "$rota/0", null, '', '', 404, null],
+        ['GET', "$rota/-1", null, '', '', 404, null],
+        ['GET', "$rota/1.5", null, '', '', 404, null],
+        ['GET', "$rota/1e2", null, '', '', 404, null],
+        ['GET', "$rota/4294967296", null, '', '', 404, null],
+        ['GET', "$rota/18446744073709551615", null, '', '', 404, null],
+        ['POST', "$rota/1", $origem, $json, '{"nome":"Exemplo"}', 405, null],
+        ['PATCH', "$rota/1", null, $json, '{"nome":"Exemplo"}', 403, null],
+        ['PATCH', "$rota/1", $origem, 'text/plain', '{}', 415, null],
+        ['PATCH', "$rota/1", $origem, $json, '{', 400, null],
+        ['PATCH', "$rota/1", $origem, $json, '[]', 422, null],
+        ['PATCH', "$rota/1", $origem, $json, '{}', 422, null],
+        ['PATCH', "$rota/1", $origem, $json, '{"id":1}', 422, null],
+        ['PATCH', "$rota/1", $origem, $json, '{"nome":null}', 422, 'nome'],
+        ['PATCH', "$rota/1", $origem, $json, '{"nome":"  "}', 422, 'nome'],
+        ['PATCH', "$rota/1", $origem, $json, '{"descricao":42}', 422, 'descricao'],
+        ['DELETE', "$rota/1", 'null', '', '', 403, null],
+        ['DELETE', "$rota/1", $origem, $json, '{}', 400, null],
+        ['DELETE', "$rota/1", $origem, '', ' ', 400, null],
     ];
     foreach ($casos as $indice => [$metodo, $caminho, $origin, $tipo, $corpo, $status, $campo]) {
-        [$retorno, $dados] = atenderProjetos($metodo, $caminho, $origin, $tipo, $corpo, $abrir);
+        $resposta = atenderProjetos($metodo, $caminho, $origin, $tipo, $corpo, $abrir);
+        [$retorno, $dados] = $resposta;
         exigirProjeto(
             $retorno === $status && isset($dados['erro']['codigo'], $dados['erro']['mensagem'])
                 && ($dados['erro']['campo'] ?? null) === $campo,
             'Contrato inválido no caso ' . ($indice + 1) . '.'
         );
+        if ($status === 405) {
+            exigirProjeto(
+                ($resposta[2] ?? '') === ($caminho === $rota ? 'GET, POST' : 'GET, PATCH, DELETE'),
+                'Métodos permitidos divergentes.'
+            );
+        }
     }
     echo count($casos) . " casos de contrato sem banco aprovados.\n";
 }
@@ -70,17 +96,21 @@ function verificarIntegracaoProjetos(): void
     $inicioDescricao = '<b>Texto literal</b>';
     $descricao = $inicioDescricao . str_repeat('á', 2000 - mb_strlen($inicioDescricao, 'UTF-8'));
     $abrir = static fn (): PDO => $pdo;
+    $id = null;
+    $idTarefa = null;
+    $origem = 'http://127.0.0.1:8082';
 
     try {
         [$status, $criado] = atenderProjetos(
             'POST',
             '/api/projetos',
-            'http://127.0.0.1:8082',
+            $origem,
             'application/json; charset=UTF-8',
             json_encode(['nome' => " $nome ", 'descricao' => " $descricao "], JSON_THROW_ON_ERROR),
             $abrir
         );
         exigirProjeto($status === 201, 'POST deveria retornar 201.');
+        $id = (int) $criado['id'];
         exigirProjeto(
             $criado['nome'] === $nome && $criado['descricao'] === $descricao && (int) $criado['id'] > 0,
             'O retorno da criação diverge dos dados persistidos.'
@@ -90,11 +120,60 @@ function verificarIntegracaoProjetos(): void
         $ler = static fn (): PDO => Conexao::local(true);
         [$status, $lista] = atenderProjetos('GET', '/api/projetos', null, '', '', $ler);
         exigirProjeto($status === 200 && in_array($criado, $lista, true), 'Projeto ausente da listagem.');
+
+        $rota = "/api/projetos/$id";
+        $chamar = static fn (string $metodo, string $corpo = ''): array =>
+            atenderProjetos($metodo, $rota, $origem, 'application/json', $corpo, $abrir);
+        exigirProjeto($chamar('GET') === [200, $criado], 'GET individual divergente.');
+
+        [$status, $editado] = $chamar('PATCH', '{"nome":"  Nome atualizado  "}');
+        exigirProjeto(
+            $status === 200 && $editado['nome'] === 'Nome atualizado' && $editado['descricao'] === $descricao,
+            'PATCH deveria preservar a descrição omitida.'
+        );
+        [$status, $editado] = $chamar('PATCH', '{"descricao":null}');
+        exigirProjeto(
+            $status === 200 && $editado['nome'] === 'Nome atualizado' && $editado['descricao'] === null,
+            'PATCH deveria limpar a descrição e preservar o nome omitido.'
+        );
+        exigirProjeto(
+            $chamar('PATCH', '{"descricao":null}') === [200, $editado],
+            'PATCH sem mudança em projeto existente deveria retornar 200.'
+        );
+        exigirProjeto(
+            atenderProjetos('GET', $rota, null, '', '', $ler) === [200, $editado],
+            'Alteração ausente em nova conexão.'
+        );
+
+        $vincular = $pdo->prepare('INSERT INTO tarefas (projeto_id, titulo) VALUES (?, ?)');
+        $vincular->execute([$id, 'Vínculo sintético de teste']);
+        $idTarefa = (int) $pdo->lastInsertId();
+        [$status, $erro] = $chamar('DELETE');
+        exigirProjeto(
+            $status === 409 && $erro['erro']['codigo'] === 'projeto_com_tarefas',
+            'DELETE com tarefa vinculada deveria retornar 409.'
+        );
+        exigirProjeto($chamar('GET') === [200, $editado], 'Conflito alterou o projeto.');
+        $limparTarefa = $pdo->prepare('DELETE FROM tarefas WHERE id = ? AND projeto_id = ?');
+        $limparTarefa->execute([$idTarefa, $id]);
+        exigirProjeto($limparTarefa->rowCount() === 1, 'Conflito removeu a tarefa vinculada.');
+        $idTarefa = null;
+        exigirProjeto($chamar('DELETE') === [204, null], 'DELETE deveria retornar 204 sem corpo.');
+        foreach (['GET', 'PATCH', 'DELETE'] as $metodo) {
+            [$status] = $chamar($metodo, $metodo === 'PATCH' ? '{"nome":"Ausente"}' : '');
+            exigirProjeto($status === 404, 'Operação em projeto ausente deveria retornar 404.');
+        }
     } finally {
-        $limpar = $pdo->prepare('DELETE FROM projetos WHERE BINARY nome = BINARY ?');
-        $limpar->execute([$nome]);
+        if ($idTarefa !== null) {
+            $limparTarefa = $pdo->prepare('DELETE FROM tarefas WHERE id = ? AND projeto_id = ?');
+            $limparTarefa->execute([$idTarefa, $id]);
+        }
+        if ($id !== null) {
+            $limpar = $pdo->prepare('DELETE FROM projetos WHERE id = ?');
+            $limpar->execute([$id]);
+        }
     }
-    echo "Criação e listagem confirmadas em devflow_test.\n";
+    echo "CRUD de projetos e conflito de integridade confirmados em devflow_test.\n";
 }
 
 ini_set('display_errors', '0');

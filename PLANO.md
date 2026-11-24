@@ -23,7 +23,7 @@ Monólito modular em PHP 8.2 com Projetos, Tarefas e infraestrutura compartilhad
 | 02.2 — Isolamento do Apache | VirtualHost aplicado no XAMPP de referência. Testes locais do 02.2C passaram e a entrada pública da UC4 preservou HTTP 200. O 02.2D documenta a reprodução, a reversão e as ressalvas no [guia de ambiente](docs/ambiente.md). |
 | 02.3 — Persistência MariaDB | Concluído no ambiente local. Schema provisionado na instância dedicada em `127.0.0.1:3307`. Testes de persistência aprovados na execução local. `devflow` foi criado sem dados de teste. Arquivos locais protegidos por NTFS e ignorados pelo Git. |
 
-O teste por outro dispositivo da rede permanece pendente. A Sprint 03.1 validou a criação e a listagem de projetos no navegador e na API, incluindo nova leitura após a gravação. A próxima fatia cobre edição e exclusão de projetos. Tarefas, Kanban e indicadores seguem planejados.
+O teste por outro dispositivo da rede permanece pendente. A Sprint 03.1 validou a criação e a listagem de projetos no navegador e na API, incluindo nova leitura após a gravação. A Sprint 03.2 concluiu o CRUD de projetos, com consulta individual pela API e aceite da edição, da persistência após recarga e da exclusão pelo navegador. A integração em `devflow_test` confirmou o HTTP 409 quando há tarefas vinculadas. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) registra a ativação do roteamento e a regressão de isolamento. Tarefas, Kanban e indicadores seguem planejados.
 
 | Prazo de 2026 | Entrega | Critério de aceite |
 |---|---|---|

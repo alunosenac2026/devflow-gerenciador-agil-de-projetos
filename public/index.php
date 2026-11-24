@@ -38,6 +38,9 @@ header('X-Content-Type-Options: nosniff');
                             <textarea class="form-control" id="descricao" name="descricao" rows="4"></textarea>
                         </div>
                         <button type="submit" id="criar-projeto" class="btn btn-primary" disabled>Criar projeto</button>
+                        <button type="button" id="cancelar-edicao" class="btn btn-outline-secondary ms-2" hidden>
+                            Cancelar edição
+                        </button>
                         <p id="mensagem-cadastro" class="mb-0 mt-3" role="status" hidden></p>
                     </form>
                     <noscript><p class="mt-3 mb-0">Ative o JavaScript para cadastrar e listar projetos.</p></noscript>

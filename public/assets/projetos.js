@@ -7,9 +7,16 @@ const mensagem = document.querySelector('#mensagem-cadastro');
 const estadoLista = document.querySelector('#estado-lista');
 const lista = document.querySelector('#lista-projetos');
 const recarregar = document.querySelector('#recarregar-projetos');
+const cancelar = document.querySelector('#cancelar-edicao');
+const tituloCadastro = document.querySelector('#titulo-cadastro');
+let editando = null;
+let ocupado = false;
 
-async function requisitar(opcoes) {
-    const resposta = await fetch(rotaProjetos, opcoes);
+async function requisitar(rota = rotaProjetos, opcoes) {
+    const resposta = await fetch(rota, opcoes);
+    if (resposta.status === 204) {
+        return null;
+    }
     const tipo = resposta.headers.get('content-type') ?? '';
     if (!tipo.toLowerCase().startsWith('application/json')) {
         throw new Error('A API de projetos está indisponível.');
@@ -23,8 +30,47 @@ async function requisitar(opcoes) {
     return dados;
 }
 
+function bloquearAcoes(bloquear) {
+    ocupado = bloquear;
+    botaoCriar.disabled = bloquear;
+    cancelar.disabled = bloquear;
+    recarregar.disabled = bloquear;
+    for (const botao of lista.querySelectorAll('button')) {
+        botao.disabled = bloquear;
+    }
+}
+
+function mostrarMensagem(texto, tipo) {
+    mensagem.className = 'alert alert-' + tipo + ' mb-0 mt-3';
+    mensagem.textContent = texto;
+    mensagem.hidden = false;
+}
+
+function erroOperacao(erro, alternativa) {
+    mostrarMensagem(erro instanceof Error && erro.name === 'Error' ? erro.message : alternativa, 'danger');
+}
+
+function atualizarEstadoLista() {
+    if (recarregar.hidden) {
+        estadoLista.textContent = 'Nenhum projeto cadastrado.';
+        estadoLista.hidden = lista.childElementCount > 0;
+    }
+}
+
+function limparEdicao() {
+    editando = null;
+    formulario.reset();
+    for (const campo of formulario.querySelectorAll('[aria-invalid]')) {
+        campo.removeAttribute('aria-invalid');
+    }
+    tituloCadastro.textContent = 'Novo projeto';
+    botaoCriar.textContent = 'Criar projeto';
+    cancelar.hidden = true;
+}
+
 function itemProjeto(projeto) {
     const item = document.createElement('li');
+    item.id = 'projeto-' + projeto.id;
     const titulo = document.createElement('h3');
     titulo.className = 'h6 mb-0';
     titulo.textContent = projeto.nome;
@@ -34,30 +80,89 @@ function itemProjeto(projeto) {
         descricao.textContent = projeto.descricao;
         item.append(descricao);
     }
+    const acoes = document.createElement('div');
+    acoes.className = 'd-flex flex-wrap gap-2 mt-3';
+    const editar = document.createElement('button');
+    editar.type = 'button';
+    editar.className = 'btn btn-outline-primary btn-sm';
+    editar.textContent = 'Editar';
+    editar.setAttribute('aria-label', 'Editar ' + projeto.nome);
+    editar.addEventListener('click', () => iniciarEdicao(projeto.id));
+    const excluir = document.createElement('button');
+    excluir.type = 'button';
+    excluir.className = 'btn btn-outline-danger btn-sm';
+    excluir.textContent = 'Excluir';
+    excluir.setAttribute('aria-label', 'Excluir ' + projeto.nome);
+    excluir.addEventListener('click', () => excluirProjeto(projeto, item));
+    acoes.append(editar, excluir);
+    item.append(acoes);
     return item;
 }
 
+async function iniciarEdicao(id) {
+    if (ocupado) {
+        return;
+    }
+    bloquearAcoes(true);
+    try {
+        const projeto = await requisitar(rotaProjetos + '/' + id);
+        limparEdicao();
+        editando = projeto.id;
+        tituloCadastro.textContent = 'Editar projeto';
+        botaoCriar.textContent = 'Salvar alterações';
+        cancelar.hidden = false;
+        formulario.elements.namedItem('nome').value = projeto.nome;
+        formulario.elements.namedItem('descricao').value = projeto.descricao ?? '';
+        formulario.elements.namedItem('nome').focus();
+        mensagem.hidden = true;
+    } catch (erro) {
+        erroOperacao(erro, 'Não foi possível carregar o projeto para edição.');
+    } finally {
+        bloquearAcoes(false);
+    }
+}
+
+async function excluirProjeto(projeto, item) {
+    if (ocupado || !window.confirm('Excluir o projeto "' + projeto.nome + '"?')) {
+        return;
+    }
+    bloquearAcoes(true);
+    try {
+        await requisitar(rotaProjetos + '/' + projeto.id, { method: 'DELETE' });
+        item.remove();
+        if (editando === projeto.id) {
+            limparEdicao();
+        }
+        atualizarEstadoLista();
+        mostrarMensagem('Projeto excluído.', 'success');
+        formulario.elements.namedItem('nome').focus();
+    } catch (erro) {
+        erroOperacao(erro, 'Não foi possível excluir o projeto.');
+    } finally {
+        bloquearAcoes(false);
+    }
+}
+
 async function carregarProjetos() {
-    botaoCriar.disabled = true;
+    bloquearAcoes(true);
     recarregar.hidden = true;
     estadoLista.hidden = false;
     estadoLista.textContent = 'Carregando projetos…';
     try {
         const projetos = await requisitar();
         lista.replaceChildren(...projetos.map(itemProjeto));
-        estadoLista.textContent = 'Nenhum projeto cadastrado.';
-        estadoLista.hidden = projetos.length > 0;
+        atualizarEstadoLista();
     } catch {
         estadoLista.textContent = 'Não foi possível carregar os projetos.';
         recarregar.hidden = false;
     } finally {
-        botaoCriar.disabled = false;
+        bloquearAcoes(false);
     }
 }
 
 formulario.addEventListener('submit', async (evento) => {
     evento.preventDefault();
-    if (botaoCriar.disabled) {
+    if (ocupado) {
         return;
     }
 
@@ -65,39 +170,43 @@ formulario.addEventListener('submit', async (evento) => {
     for (const campo of formulario.querySelectorAll('[aria-invalid]')) {
         campo.removeAttribute('aria-invalid');
     }
-    botaoCriar.disabled = true;
-    recarregar.disabled = true;
+    bloquearAcoes(true);
     mensagem.hidden = true;
 
     try {
-        const projeto = await requisitar({
-            method: 'POST',
+        const alterando = editando !== null;
+        const rota = alterando ? rotaProjetos + '/' + editando : rotaProjetos;
+        const projeto = await requisitar(rota, {
+            method: alterando ? 'PATCH' : 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome: campos.get('nome'), descricao: campos.get('descricao') }),
         });
-        lista.prepend(itemProjeto(projeto));
-        if (recarregar.hidden) {
-            estadoLista.hidden = true;
+        const item = itemProjeto(projeto);
+        const anterior = alterando ? document.getElementById('projeto-' + projeto.id) : null;
+        if (anterior) {
+            anterior.replaceWith(item);
+        } else {
+            lista.prepend(item);
         }
-        formulario.reset();
-        mensagem.className = 'alert alert-success mb-0 mt-3';
-        mensagem.textContent = 'Projeto criado.';
+        atualizarEstadoLista();
+        limparEdicao();
+        mostrarMensagem(alterando ? 'Projeto atualizado.' : 'Projeto criado.', 'success');
     } catch (erro) {
-        mensagem.className = 'alert alert-danger mb-0 mt-3';
-        mensagem.textContent = erro instanceof Error && erro.name === 'Error'
-            ? erro.message
-            : 'Não foi possível salvar o projeto. Tente novamente.';
+        erroOperacao(erro, 'Não foi possível salvar o projeto. Tente novamente.');
         if (erro.campo === 'nome' || erro.campo === 'descricao') {
             const campo = formulario.elements.namedItem(erro.campo);
             campo.setAttribute('aria-invalid', 'true');
             campo.focus();
         }
     } finally {
-        mensagem.hidden = false;
-        recarregar.disabled = false;
-        botaoCriar.disabled = false;
+        bloquearAcoes(false);
     }
 });
 
 recarregar.addEventListener('click', carregarProjetos);
+cancelar.addEventListener('click', () => {
+    limparEdicao();
+    mensagem.hidden = true;
+    formulario.elements.namedItem('nome').focus();
+});
 carregarProjetos();

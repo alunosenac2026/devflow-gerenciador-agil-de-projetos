@@ -6,7 +6,6 @@ use DevFlow\Infra\Conexao;
 use function DevFlow\Projetos\atenderProjetos;
 
 ini_set('display_errors', '0');
-header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
@@ -16,15 +15,17 @@ try {
 
     $metodo = $_SERVER['REQUEST_METHOD'] ?? '';
     $rota = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
-    [$status, $resposta] = atenderProjetos(
+    $resultado = atenderProjetos(
         $metodo,
         $rota,
         $_SERVER['HTTP_ORIGIN'] ?? null,
         $_SERVER['CONTENT_TYPE'] ?? '',
-        $metodo === 'POST' && $rota === '/api/projetos' ? (string) file_get_contents('php://input') : '',
+        in_array($metodo, ['POST', 'PATCH', 'DELETE'], true) ? (string) file_get_contents('php://input') : '',
         Conexao::local(...)
     );
-    $json = json_encode($resposta, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    [$status, $resposta] = $resultado;
+    $permitidos = $resultado[2] ?? null;
+    $json = $status === 204 ? '' : json_encode($resposta, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 } catch (Throwable) {
     $status = 500;
     $json = json_encode([
@@ -33,7 +34,10 @@ try {
 }
 
 if ($status === 405) {
-    header('Allow: GET, POST');
+    header('Allow: ' . $permitidos);
+}
+if ($status !== 204) {
+    header('Content-Type: application/json; charset=UTF-8');
 }
 http_response_code($status);
 echo $json;

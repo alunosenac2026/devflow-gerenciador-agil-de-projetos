@@ -12,7 +12,7 @@
 
 ## Acesso local
 
-Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/) para criar e listar projetos. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) descreve a regra local usada pela API e os testes de isolamento.
+Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/) para criar, listar, editar e excluir projetos. Ao excluir, a interface pede confirmação. Projetos com tarefas vinculadas ficam protegidos pela API, que retorna HTTP 409. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) descreve o roteamento e as verificações locais.
 
 ## Persistência local
 

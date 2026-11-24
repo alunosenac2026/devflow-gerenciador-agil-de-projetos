@@ -46,6 +46,8 @@ O contrato reserva 400 para JSON malformado, 404 para recurso inexistente, 409 p
 
 Na Sprint 03.1, `GET /api/projetos` devolve um array de projetos, do ID mais recente ao mais antigo, e `POST /api/projetos` devolve o projeto criado. Ambos retornam `id`, `nome`, `descricao`, `criado_em` e `atualizado_em`. O resumo de progresso entra com a fatia de indicadores. O objeto `erro` contém `codigo`, `mensagem` e, quando aplicável, `campo`. Métodos não atendidos na rota retornam 405 com `Allow: GET, POST`.
 
+Na Sprint 03.2, as rotas individuais aceitam IDs de 1 a 4294967295, conforme a chave `INT UNSIGNED`. `GET` e `PATCH` devolvem o projeto no mesmo formato da criação. `DELETE` devolve 204 sem corpo ou 409 quando a chave estrangeira impede a exclusão por existirem tarefas. Métodos não atendidos na rota individual retornam 405 com `Allow: GET, PATCH, DELETE`.
+
 ### Campos de entrada
 
 | Recurso e campo | Tipo e validação | POST | PATCH |
@@ -70,4 +72,4 @@ No ambiente de referência, o DevFlow tem um VirtualHost vinculado a `127.0.0.1:
 
 Os testes locais confirmaram o bloqueio do checkout pelos hosts compartilhados HTTP e HTTPS e dos mapeamentos herdados na porta dedicada. A configuração aplicada, os resultados e o teste pendente a partir de outro dispositivo estão no [guia de ambiente](ambiente.md).
 
-A rota `/api/projetos` usa uma regra exata no VirtualHost dedicado. A [regra e seu aceite local](ambiente.md#rota-de-projetos) estão registrados no guia de ambiente. As demais rotas REST seguem planejadas. O MariaDB dedicado usa `127.0.0.1:3307` com diretório de dados independente. A infraestrutura PDO aceita somente o destino e a conta de execução esperados para cada ambiente. O instalador local aplica o mesmo schema em dois bancos separados e limita as contas de execução às operações DML nas tabelas do próprio banco. O procedimento está no [guia de ambiente](ambiente.md#persistência-na-instância-dedicada).
+O VirtualHost dedicado encaminha a coleção `/api/projetos` e as rotas individuais `/api/projetos/{id}` para `public/api/index.php`. A API valida o identificador antes de acessar o banco. A [regra e seu aceite local](ambiente.md#rota-de-projetos) estão registrados no guia de ambiente. As rotas de tarefas e progresso seguem planejadas. O MariaDB dedicado usa `127.0.0.1:3307` com diretório de dados independente. A infraestrutura PDO aceita somente o destino e a conta de execução esperados para cada ambiente. O instalador local aplica o mesmo schema em dois bancos separados e limita as contas de execução às operações DML nas tabelas do próprio banco. O procedimento está no [guia de ambiente](ambiente.md#persistência-na-instância-dedicada).

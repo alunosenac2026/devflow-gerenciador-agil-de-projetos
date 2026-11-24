@@ -1,6 +1,6 @@
 # Ambiente local do DevFlow
 
-O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. O 02.3 fornece a infraestrutura de persistência descrita abaixo. A interface e a API REST seguem planejadas. Este procedimento se destina ao ambiente acadêmico local.
+O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. O 02.3 fornece a infraestrutura de persistência descrita abaixo. O CRUD de projetos está disponível no navegador e na API. Este procedimento se destina ao ambiente acadêmico local.
 
 ## Pré-requisitos verificados
 
@@ -57,6 +57,8 @@ Listen 127.0.0.1:8082
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1:8082$
     RewriteRule ^ - [F]
 
+    RewriteRule ^/api/projetos(?:/[^/]+)?$ /api/index.php [PT,L]
+
     RewriteRule !^/(?:|index\.php|api/index\.php|assets/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*\.(?:css|js|png|jpe?g|gif|webp|svg|ico|woff2?))$ - [F]
 
     <Directory "CAMINHO_DO_CHECKOUT/public">
@@ -72,7 +74,7 @@ Listen 127.0.0.1:8082
 </VirtualHost>
 ```
 
-A regra global de diretório bloqueia o caminho físico do checkout pelos hosts compartilhados. A autorização para `public/` está dentro do VirtualHost dedicado, que combina escuta no loopback, cliente local e validação de `Host`. A lista de URLs bloqueia os caminhos dos mapeamentos herdados nesse VirtualHost. A regra atual permite as entradas previstas e os formatos estáticos listados. As rotas REST precisarão de um ajuste explícito acompanhado de novos testes de isolamento.
+A regra global de diretório bloqueia o caminho físico do checkout pelos hosts compartilhados. A autorização para `public/` está dentro do VirtualHost dedicado, que combina escuta no loopback, cliente local e validação de `Host`. O modelo encaminha as rotas de projetos ao despachante e restringe os demais caminhos às entradas e aos formatos estáticos listados. A inclusão de novas rotas exige um ajuste explícito e novos testes de isolamento.
 
 ## Backup, validação, aplicação e reversão
 
@@ -182,13 +184,19 @@ O executor abre apenas `devflow_test` com `devflow_test_app` na porta `3307`. Os
 
 ## Rota de projetos
 
-Após validar a configuração do VirtualHost dedicada, insira a regra abaixo depois da rejeição de `Host` e antes da regra geral de bloqueio de URLs. Use o mesmo procedimento de backup e validação do Apache descrito acima.
+O modelo inclui a regra abaixo depois da rejeição de `Host` e antes da regra geral de bloqueio de URLs. Ela encaminha a coleção e os caminhos com um único segmento após `/api/projetos/`. A API valida esse segmento e responde em JSON quando o identificador é inválido.
 
 ```apache
-RewriteRule ^/api/projetos$ /api/index.php [PT,L]
+RewriteRule ^/api/projetos(?:/[^/]+)?$ /api/index.php [PT,L]
 ```
 
 Na Sprint 03.1, a integração passou em `devflow_test`. Após reiniciar o Apache, o cadastro feito no navegador retornou HTTP 201 no log, apareceu na página e foi confirmado por uma nova consulta HTTP 200. Os caminhos privados testados permaneceram bloqueados em HTTP e HTTPS. A entrada pública da UC4 manteve HTTP 200.
+
+Para atualizar a configuração da Sprint 03.1, faça backup restrito de `httpd-devflow.conf` fora de `htdocs` e do repositório, confira o SHA-256 e substitua apenas a regra da coleção pela regra acima. Preserve as ACLs e valide com `httpd -t` e `httpd -S` antes do reinício. Se houver falha, restaure o arquivo dedicado pelo backup verificado e valide a restauração antes de reaplicar a configuração anterior.
+
+Na Sprint 03.2, a sintaxe e os VirtualHosts foram validados antes do reinício manual do Apache. Após o reinício, a coleção e a consulta individual retornaram HTTP 200 com JSON. Identificadores inválidos retornaram 404, `PATCH` sem campos retornou 422 e `DELETE` com corpo indevido retornou 400. A integração em `devflow_test` validou o conflito 409 para projeto com tarefas. O responsável confirmou no navegador a edição de nome e descrição, a persistência após recarga e a exclusão do projeto descartável.
+
+A escuta permaneceu exclusiva em `127.0.0.1:8082`. O `Host` indevido e os caminhos privados testados retornaram HTTP 403 no VirtualHost dedicado. O checkout e o acesso direto ao despachante retornaram 403 pelos hosts compartilhados em HTTP e HTTPS. A sondagem HTTPS local usou a validação do certificado desativada. A entrada pública da UC4 manteve HTTP 200.
 
 ### Resultado do incremento 02.3
 
