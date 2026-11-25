@@ -14,7 +14,9 @@
 
 Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/) para criar, listar, editar e excluir projetos. Ao excluir, a interface pede confirmação. Projetos com tarefas vinculadas ficam protegidos pela API, que retorna HTTP 409. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) descreve o roteamento e as verificações locais.
 
-Em **Tarefas do projeto**, escolha um projeto para criar, listar, editar ou excluir suas tarefas e ajustar prioridade e estado. A lista é ordenada por posição e ID. A seleção fica na URL e é recuperada após recarregar a página. O guia de ambiente descreve as [rotas de tarefas e sua validação](docs/ambiente.md#rotas-de-tarefas).
+Em **Tarefas do projeto**, escolha um projeto para criar tarefas e ver o quadro Kanban. Cada cartão mostra a prioridade e oferece as ações **Editar**, **Excluir** e **Mover**. Para mover uma tarefa, escolha o destino em **Mover para** e confirme em **Mover**. Em cada coluna, o quadro respeita posição e ID. A seleção do projeto é recuperada após recarregar a página. O guia de ambiente descreve as [rotas de tarefas e sua validação](docs/ambiente.md#rotas-de-tarefas).
+
+O prazo oficial e os marcos de entrega estão no [cronograma do MVP](PLANO.md#cronograma).
 
 ## Persistência local
 

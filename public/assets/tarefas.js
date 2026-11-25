@@ -9,10 +9,15 @@ export function iniciarTarefas(requisitar) {
     const tituloLista = document.querySelector('#titulo-lista-tarefas');
     const salvar = document.querySelector('#salvar-tarefa');
     const cancelar = document.querySelector('#cancelar-tarefa');
-    const lista = document.querySelector('#lista-tarefas');
-    const estadoLista = document.querySelector('#estado-lista-tarefas');
+    const quadro = document.querySelector('#quadro-tarefas');
+    const colunas = [...quadro.querySelectorAll('[data-estado]')].map(coluna => ({
+        estado: coluna.dataset.estado,
+        lista: coluna.querySelector('ul'),
+        vazia: coluna.querySelector('.kanban-vazia'),
+    }));
     const mensagem = document.querySelector('#mensagem-tarefas');
     const titulo = formulario.elements.namedItem('titulo');
+    const campoEstado = formulario.elements.namedItem('status');
     const projetos = new Map();
     let projetoId = '';
     let editando = null;
@@ -25,15 +30,19 @@ export function iniciarTarefas(requisitar) {
         seletor.disabled = bloquear || projetos.size === 0;
         salvar.disabled = bloquear || projetoId === '';
         cancelar.disabled = bloquear;
-        for (const botao of lista.querySelectorAll('button')) {
-            botao.disabled = bloquear;
+        for (const controle of quadro.querySelectorAll('button, select')) {
+            controle.disabled = bloquear;
         }
     }
 
     function mostrarMensagem(texto, tipo) {
         mensagem.className = 'alert alert-' + tipo + ' mb-3';
         mensagem.textContent = texto;
-        mensagem.hidden = false;
+    }
+
+    function limparMensagem() {
+        mensagem.className = '';
+        mensagem.textContent = '';
     }
 
     function informarErro(erro, alternativa) {
@@ -65,9 +74,9 @@ export function iniciarTarefas(requisitar) {
         projetoId = '';
         tarefas = [];
         conteudo.hidden = true;
-        lista.replaceChildren();
+        renderizarTarefas();
         limparEdicao();
-        mensagem.hidden = true;
+        limparMensagem();
         guardarSelecao();
     }
 
@@ -86,22 +95,24 @@ export function iniciarTarefas(requisitar) {
         seletor.replaceChildren(...opcoes);
         seletor.value = projetos.has(escolhido) ? escolhido : projetoId;
         if (projetos.has(projetoId)) {
-            tituloLista.textContent = 'Tarefas de ' + projetos.get(projetoId).nome;
+            tituloLista.textContent = 'Quadro de ' + projetos.get(projetoId).nome;
         }
         bloquearAcoes(ocupado);
     }
 
     function itemTarefa(tarefa) {
         const item = document.createElement('li');
-        const nome = document.createElement('h4');
-        nome.className = 'h6 mb-1';
+        item.className = 'kanban-cartao';
+        const nome = document.createElement('h5');
+        nome.className = 'h6 mb-2';
         nome.textContent = tarefa.titulo;
-        const meta = document.createElement('small');
-        meta.className = 'text-body-secondary';
-        meta.textContent = prioridades[tarefa.prioridade] + ' · ' + estados[tarefa.status];
-        item.append(nome, meta);
+        const prioridade = document.createElement('span');
+        prioridade.className = 'badge kanban-prioridade-' + tarefa.prioridade;
+        prioridade.textContent = prioridades[tarefa.prioridade];
+        item.append(nome, prioridade);
         if (tarefa.descricao) {
             const descricao = document.createElement('p');
+            descricao.className = 'mb-0 mt-2';
             descricao.textContent = tarefa.descricao;
             item.append(descricao);
         }
@@ -122,13 +133,83 @@ export function iniciarTarefas(requisitar) {
         excluir.addEventListener('click', () => excluirTarefa(tarefa));
         acoes.append(editar, excluir);
         item.append(acoes);
+
+        const formMover = document.createElement('form');
+        formMover.className = 'mt-3';
+        const rotuloMover = document.createElement('label');
+        rotuloMover.className = 'form-label small mb-1';
+        rotuloMover.textContent = 'Mover para';
+        const destino = document.createElement('select');
+        destino.id = 'destino-tarefa-' + tarefa.id;
+        destino.className = 'form-select form-select-sm';
+        destino.required = true;
+        destino.setAttribute('aria-label', 'Mover para outro estado: ' + tarefa.titulo);
+        rotuloMover.htmlFor = destino.id;
+        const inicial = document.createElement('option');
+        inicial.value = '';
+        inicial.textContent = 'Selecione o estado';
+        destino.append(inicial);
+        for (const [estado, rotulo] of Object.entries(estados)) {
+            if (estado !== tarefa.status) {
+                const opcao = document.createElement('option');
+                opcao.value = estado;
+                opcao.textContent = rotulo;
+                destino.append(opcao);
+            }
+        }
+        const mover = document.createElement('button');
+        mover.type = 'submit';
+        mover.className = 'btn btn-outline-primary btn-sm mt-2';
+        mover.textContent = 'Mover';
+        mover.setAttribute('aria-label', 'Mover tarefa ' + tarefa.titulo);
+        formMover.append(rotuloMover, destino, mover);
+        formMover.addEventListener('submit', evento => {
+            evento.preventDefault();
+            moverTarefa(tarefa, destino.value);
+        });
+        item.append(formMover);
         return item;
     }
 
     function renderizarTarefas() {
         tarefas.sort((a, b) => a.posicao - b.posicao || a.id - b.id);
-        lista.replaceChildren(...tarefas.map(itemTarefa));
-        estadoLista.hidden = tarefas.length > 0;
+        for (const coluna of colunas) {
+            const itens = tarefas.filter(tarefa => tarefa.status === coluna.estado);
+            coluna.lista.replaceChildren(...itens.map(itemTarefa));
+            coluna.vazia.hidden = itens.length > 0;
+        }
+    }
+
+    async function moverTarefa(tarefa, destino) {
+        if (ocupado || !destino || destino === tarefa.status) {
+            return;
+        }
+        const selecionado = projetoId;
+        bloquearAcoes(true);
+        mostrarMensagem('Movendo tarefa…', 'info');
+        try {
+            const atualizada = await requisitar('/api/tarefas/' + tarefa.id, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: destino }),
+            });
+            if (projetoId !== selecionado) {
+                return;
+            }
+            tarefas = tarefas.map(item => item.id === tarefa.id ? atualizada : item);
+            if (editando === tarefa.id && campoEstado.value === tarefa.status) {
+                campoEstado.value = atualizada.status;
+            }
+            renderizarTarefas();
+            mostrarMensagem('Tarefa movida para ' + estados[atualizada.status] + '.', 'success');
+        } catch (erro) {
+            informarErro(erro, 'Não foi possível mover a tarefa.');
+        } finally {
+            bloquearAcoes(false);
+            if (projetoId === selecionado) {
+                document.getElementById('destino-tarefa-' + tarefa.id)?.focus();
+            }
+        }
     }
 
     async function selecionarProjeto(id) {
@@ -151,9 +232,9 @@ export function iniciarTarefas(requisitar) {
             tarefas = resultado;
             limparEdicao();
             renderizarTarefas();
-            tituloLista.textContent = 'Tarefas de ' + projetos.get(id).nome;
+            tituloLista.textContent = 'Quadro de ' + projetos.get(id).nome;
             conteudo.hidden = false;
-            mensagem.hidden = true;
+            limparMensagem();
             guardarSelecao();
         } catch (erro) {
             seletor.value = projetoId;
@@ -182,8 +263,8 @@ export function iniciarTarefas(requisitar) {
             titulo.value = tarefa.titulo;
             formulario.elements.namedItem('descricao').value = tarefa.descricao ?? '';
             formulario.elements.namedItem('prioridade').value = tarefa.prioridade;
-            formulario.elements.namedItem('status').value = tarefa.status;
-            mensagem.hidden = true;
+            campoEstado.value = tarefa.status;
+            limparMensagem();
             titulo.focus();
         } catch (erro) {
             informarErro(erro, 'Não foi possível carregar a tarefa para edição.');
@@ -260,7 +341,7 @@ export function iniciarTarefas(requisitar) {
     seletor.addEventListener('change', () => selecionarProjeto(seletor.value));
     cancelar.addEventListener('click', () => {
         limparEdicao();
-        mensagem.hidden = true;
+        limparMensagem();
         titulo.focus();
     });
 

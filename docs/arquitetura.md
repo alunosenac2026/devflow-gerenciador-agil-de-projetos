@@ -62,6 +62,10 @@ Na Sprint 04, os mesmos limites de ID se aplicam a tarefas e ao projeto informad
 
 As rotas POST e PATCH recebem um objeto JSON em UTF-8. Os limites são contados em caracteres Unicode, sem coerção de tipos. Campos desconhecidos ou gerenciados pelo servidor, incluindo `id`, `projeto_id`, datas e `posicao`, geram 422. O PATCH precisa de pelo menos um campo aceito e preserva campos omitidos. Uma entrada inválida rejeita a operação inteira. IDs na rota são inteiros decimais positivos dentro do intervalo do identificador no banco. IDs inválidos ou ausentes no banco retornam 404. `posicao` é interna, começa em 0 e permanece intacta ao mover a tarefa.
 
+### Quadro Kanban
+
+A interface agrupa as tarefas do projeto selecionado pelo `status` retornado pela API e ordena cada coluna por `posicao` e `id`. O controle nativo de destino oferece os dois estados alternativos. A confirmação envia apenas `status` ao `PATCH /api/tarefas/{id}`. A resposta de sucesso atualiza o cartão e devolve o foco ao controle da tarefa. Em caso de erro, a interface comunica a falha e preserva o cartão na coluna anterior. Criar, editar e excluir tarefas continuam usando a mesma API.
+
 ### Política de escrita
 
 - POST e PATCH exigem `Content-Type: application/json`. Aceitar o parâmetro `charset=UTF-8` quando informado. Tipo ausente ou diferente retorna 415. JSON malformado retorna 400 e um valor JSON que não seja objeto retorna 422. DELETE opera sem corpo e rejeita corpo com 400.

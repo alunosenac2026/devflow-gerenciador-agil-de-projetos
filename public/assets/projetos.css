@@ -67,3 +67,46 @@ h1 {
     color: var(--bs-secondary-color);
     white-space: pre-wrap;
 }
+
+.kanban-coluna {
+    padding: .85rem;
+    border: 1px solid var(--df-borda);
+    border-radius: .75rem;
+    background: #f3f6fc;
+}
+
+.kanban-cartao {
+    padding: .85rem;
+    border: 1px solid var(--df-borda);
+    border-radius: .6rem;
+    background: #fff;
+    overflow-wrap: anywhere;
+}
+
+.kanban-cartao + .kanban-cartao {
+    margin-top: .65rem;
+}
+
+.kanban-cartao p {
+    white-space: pre-wrap;
+}
+
+.kanban-prioridade-baixa {
+    color: #17513a;
+    background: #e1f3e9;
+}
+
+.kanban-prioridade-media {
+    color: #614002;
+    background: #fff0c5;
+}
+
+.kanban-prioridade-alta {
+    color: #842735;
+    background: #fbe6e9;
+}
+
+.kanban-cartao :focus-visible {
+    outline: 2px solid var(--df-azul);
+    outline-offset: 2px;
+}

@@ -29,6 +29,12 @@ Após a ativação das rotas, as sondagens confirmaram que a coleção e a consu
 
 No aceite manual, o responsável confirmou cadastro, listagem, ordenação, edição, prioridades, estados, persistência após recarga e exclusão no navegador. O projeto descartável foi excluído.
 
+Evidências da Sprint 05
+
+- **Integração automatizada.** `tests/tarefas.php --integracao` executou as seis transições em `devflow_test`. Após cada `PATCH`, uma nova conexão leu a coleção do projeto e confirmou estado, posição e ordenação. A movimentação preservou vínculo, título, descrição e prioridade.
+- **Interface automatizada.** O Chrome headless acessou a página servida pelo Apache com respostas simuladas da API. Os testes verificaram as seis transições por teclado, a recarga após cada movimento, a devolução do foco ao cartão, a preservação da coluna diante de falha, o CRUD de tarefas e o layout em 390 e 1280 px.
+- **Aceite manual.** O responsável confirmou o funcionamento do Kanban no navegador com a API real.
+
 - [ ] Exercitar todas as rotas de projetos e tarefas e conferir códigos HTTP, JSON e ausência de corpo em 204.
 - [ ] Confirmar 400 para JSON malformado, 404 para recurso inexistente e 422 para campos inválidos, sem alterações persistidas.
 - [ ] Em POST e PATCH, verificar tipos, campos obrigatórios, espaços em branco, limites de 120 e 2.000 caracteres com conteúdo multibyte, nulidade, PATCH vazio, campos desconhecidos e rejeição de `posicao` e demais campos internos. Testar limpeza da descrição por `null` e preservação dos campos omitidos.

@@ -25,14 +25,19 @@ Monólito modular em PHP 8.2 com Projetos, Tarefas e infraestrutura compartilhad
 
 O teste por outro dispositivo da rede permanece pendente. A Sprint 03.1 validou a criação e a listagem de projetos no navegador e na API, incluindo nova leitura após a gravação. A Sprint 03.2 concluiu o CRUD de projetos, com consulta individual pela API e aceite da edição, da persistência após recarga e da exclusão pelo navegador. A integração em `devflow_test` confirmou o HTTP 409 quando há tarefas vinculadas. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) registra a ativação do roteamento e a regressão de isolamento.
 
-A Sprint 04 concluiu o CRUD de tarefas no projeto selecionado, com prioridades, estados e ordenação por posição e ID. O contrato e a integração em `devflow_test` passaram. Após a ativação das rotas, o responsável confirmou cadastro, listagem, edição, persistência após recarga e exclusão pelo navegador. As verificações técnicas confirmaram o isolamento HTTP/HTTPS e a disponibilidade da entrada pública da UC4. Kanban e indicadores permanecem planejados.
+A Sprint 04 concluiu o CRUD de tarefas no projeto selecionado, com prioridades, estados e ordenação por posição e ID. O contrato e a integração em `devflow_test` passaram. Após a ativação das rotas, o responsável confirmou cadastro, listagem, edição, persistência após recarga e exclusão pelo navegador. As verificações técnicas confirmaram o isolamento HTTP/HTTPS e a disponibilidade da entrada pública da UC4.
 
-| Prazo de 2026 | Entrega | Critério de aceite |
+A Sprint 05 concluiu o quadro Kanban com três colunas, prioridade identificada por texto e cor e movimentação por teclado. Os testes automatizados confirmaram as seis transições em `devflow_test`, com persistência em nova leitura, e verificaram o comportamento da interface no Chrome com respostas simuladas. O responsável confirmou separadamente o aceite no navegador com a API real. Os indicadores de progresso permanecem planejados.
+
+## Cronograma
+
+O prazo oficial de entrega informado pelo professor é **26/11/2026 às 23h59**.
+
+| Data de 2026 | Entrega | Critério de aceite |
 |---|---|---|
-| Até 24/11 | Fechar contrato, confirmar ambiente e começar a persistência após autorização. | Confirmar PHP 8.2 com PDO no Apache, validar o esquema em banco vazio MariaDB 10.4.32 e demonstrar o isolamento local antes de disponibilizar a aplicação. |
-| 25–26/11 | Entregar CRUD de projetos e tarefas na API e na interface. | Cobrir operações, validação, padrões, ordenação e integridade. Retornar 409 e preservar os registros quando o projeto tiver tarefas. |
-| 27/11 | Entregar Kanban acessível e progresso. | Verificar as seis transições, atualizar indicadores após gravação bem-sucedida e confirmar persistência após recarga. Comunicar falhas e preservar a interface anterior. |
-| 28–29/11 | Executar regressão e segurança, corrigir falhas e documentar a execução. | Revisar consultas parametrizadas, executar a matriz de testes, verificar isolamento HTTP/HTTPS e banco e registrar resultados e pendências até 29/11/2026. |
+| Até 24/11 | Concluir ambiente, persistência, CRUD de projetos e tarefas e Kanban. | Aceites e verificações registrados em Incrementos e aceite. |
+| 25/11 | Implementar e validar os indicadores de progresso. | Conferir contagens por estado, arredondamento e 0% em projeto vazio. Atualizar após criar, mover ou excluir tarefas com sucesso e preservar os valores exibidos em caso de falha. |
+| 26/11, até 23h59 | Concluir a regressão, fechar a documentação e entregar o MVP. | Executar a matriz final, registrar resultados e pendências e preparar a versão de entrega. |
 
 Os marcos dependem da autorização da implementação e de eventuais ajustes no ambiente. Se a publicação local segura atrasar, priorizar a validação de persistência em banco de teste e manter o aceite de implantação pendente até confirmar o isolamento.
 

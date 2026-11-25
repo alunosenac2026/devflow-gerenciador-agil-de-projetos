@@ -169,6 +169,33 @@ function verificarIntegracaoTarefas(): void
             atenderTarefas('GET', $rotaTarefa, null, '', '', $novaConexao, $lerOrigem) === [200, $editada],
             'Nova conexão deveria recuperar somente as alterações válidas.'
         );
+
+        $transicoes = [
+            ['concluido', 'a_fazer'],
+            ['a_fazer', 'em_andamento'],
+            ['em_andamento', 'a_fazer'],
+            ['a_fazer', 'concluido'],
+            ['concluido', 'em_andamento'],
+            ['em_andamento', 'concluido'],
+        ];
+        $camposPreservados = array_flip(['id', 'projeto_id', 'titulo', 'descricao', 'prioridade', 'posicao', 'criado_em']);
+        $dadosOriginais = array_intersect_key($editada, $camposPreservados);
+        foreach ($transicoes as [$origemEstado, $destinoEstado]) {
+            exigirTarefa($editada['status'] === $origemEstado, 'Estado de origem inesperado na transição.');
+            [$status, $editada] = $chamar('PATCH', $rotaTarefa, ['status' => $destinoEstado]);
+            exigirTarefa(
+                $status === 200 && $editada['status'] === $destinoEstado
+                    && array_intersect_key($editada, $camposPreservados) === $dadosOriginais,
+                "Transição $origemEstado → $destinoEstado deveria alterar somente o estado da tarefa."
+            );
+            [$status, $aposRecarga] = atenderTarefas('GET', $rotaA, null, '', '', $novaConexao, $lerOrigem);
+            exigirTarefa(
+                $status === 200 && in_array($editada, $aposRecarga, true)
+                    && array_column($aposRecarga, 'id') === [$media['id'], $alta['id'], $padrao['id']],
+                "Transição $origemEstado → $destinoEstado deveria persistir e manter a ordenação."
+            );
+        }
+
         [$status] = atenderProjetos('DELETE', "/api/projetos/$primeiro", $origem, '', '', $abrir, $lerOrigem);
         exigirTarefa($status === 409, 'Projeto com tarefas deveria permanecer protegido.');
         exigirTarefa($chamar('DELETE', $rotaTarefa) === [204, null], 'Exclusão deveria retornar 204 sem corpo.');
@@ -191,6 +218,7 @@ function verificarIntegracaoTarefas(): void
         }
     }
     echo "CRUD de tarefas, prioridades, vínculo e ordenação confirmados em devflow_test.\n";
+    echo "Seis transições do Kanban confirmadas em devflow_test, com nova leitura a cada movimento.\n";
 }
 
 ini_set('display_errors', '0');
