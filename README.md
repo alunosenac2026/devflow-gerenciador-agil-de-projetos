@@ -14,10 +14,12 @@
 
 Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/) para criar, listar, editar e excluir projetos. Ao excluir, a interface pede confirmação. Projetos com tarefas vinculadas ficam protegidos pela API, que retorna HTTP 409. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) descreve o roteamento e as verificações locais.
 
+Em **Tarefas do projeto**, escolha um projeto para criar, listar, editar ou excluir suas tarefas e ajustar prioridade e estado. A lista é ordenada por posição e ID. A seleção fica na URL e é recuperada após recarregar a página. O guia de ambiente descreve as [rotas de tarefas e sua validação](docs/ambiente.md#rotas-de-tarefas).
+
 ## Persistência local
 
 O DevFlow usa a instância dedicada MariaDB 10.4.32 em `127.0.0.1:3307`. Após iniciar a instância, siga o [procedimento de instalação e testes](docs/ambiente.md#persistência-na-instância-dedicada) para aplicar `database/schema.sql`, criar as contas restritas e gerar `config/local.php` e `config/local.test.php`. Ambos os arquivos são ignorados pelo Git e ficam fora de `public/`.
 
 No ambiente acadêmico de referência, o provisionamento local concluiu a instalação de `devflow_test`, validou a persistência e criou `devflow` sem dados de teste. As configurações locais foram verificadas por metadados e permanecem protegidas por NTFS e ignoradas pelo Git.
 
-Para reexecutar os testes, use `C:/xampp/php/php.exe tests/persistencia.php` e `C:/xampp/php/php.exe tests/projetos.php --integracao` no PowerShell do usuário responsável. Ambos usam o banco exclusivo de testes.
+Para reexecutar os testes, use `C:/xampp/php/php.exe tests/persistencia.php`, `C:/xampp/php/php.exe tests/projetos.php --integracao` e `C:/xampp/php/php.exe tests/tarefas.php --integracao` no PowerShell do usuário responsável. As integrações usam o banco exclusivo de testes.

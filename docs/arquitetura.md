@@ -48,6 +48,8 @@ Na Sprint 03.1, `GET /api/projetos` devolve um array de projetos, do ID mais rec
 
 Na Sprint 03.2, as rotas individuais aceitam IDs de 1 a 4294967295, conforme a chave `INT UNSIGNED`. `GET` e `PATCH` devolvem o projeto no mesmo formato da criação. `DELETE` devolve 204 sem corpo ou 409 quando a chave estrangeira impede a exclusão por existirem tarefas. Métodos não atendidos na rota individual retornam 405 com `Allow: GET, PATCH, DELETE`.
 
+Na Sprint 04, os mesmos limites de ID se aplicam a tarefas e ao projeto informado na rota de coleção. Cada tarefa devolvida contém `id`, `projeto_id`, `titulo`, `descricao`, `prioridade`, `status`, `posicao`, `criado_em` e `atualizado_em`. A lista distingue um projeto existente sem tarefas (`200` com `[]`) de um projeto inexistente (`404`). O banco confirma a existência do projeto pela chave estrangeira na criação e aplica os padrões dos campos omitidos. A edição mantém vínculo, posição e os demais campos omitidos. Métodos não atendidos recebem `Allow: GET, POST` na coleção ou `Allow: GET, PATCH, DELETE` na rota individual.
+
 ### Campos de entrada
 
 | Recurso e campo | Tipo e validação | POST | PATCH |
@@ -63,7 +65,7 @@ As rotas POST e PATCH recebem um objeto JSON em UTF-8. Os limites são contados 
 ### Política de escrita
 
 - POST e PATCH exigem `Content-Type: application/json`. Aceitar o parâmetro `charset=UTF-8` quando informado. Tipo ausente ou diferente retorna 415. JSON malformado retorna 400 e um valor JSON que não seja objeto retorna 422. DELETE opera sem corpo e rejeita corpo com 400.
-- Exigir em POST, PATCH e DELETE o cabeçalho `Origin` com correspondência exata de esquema, host e porta a uma origem local configurada. Origem ausente, `null` ou divergente retorna 403 antes de qualquer gravação. Os testes de API enviam a origem configurada.
+- Exigir em POST, PATCH e DELETE o cabeçalho `Origin` com correspondência exata a `app.origin` da configuração local. Projetos e tarefas compartilham essa validação. Origem ausente, `null` ou divergente retorna 403 antes de qualquer gravação. A integração usa `app.origin` da configuração exclusiva de testes.
 - Manter frontend e API na mesma origem e evitar permissões CORS para origens externas. CORS regula acesso entre origens no navegador. O isolamento local depende das restrições de rede e do servidor, inclusive porque clientes fora do navegador podem forjar cabeçalhos. O MVP opera sem autenticação.
 
 ## Exposição no XAMPP
@@ -72,4 +74,4 @@ No ambiente de referência, o DevFlow tem um VirtualHost vinculado a `127.0.0.1:
 
 Os testes locais confirmaram o bloqueio do checkout pelos hosts compartilhados HTTP e HTTPS e dos mapeamentos herdados na porta dedicada. A configuração aplicada, os resultados e o teste pendente a partir de outro dispositivo estão no [guia de ambiente](ambiente.md).
 
-O VirtualHost dedicado encaminha a coleção `/api/projetos` e as rotas individuais `/api/projetos/{id}` para `public/api/index.php`. A API valida o identificador antes de acessar o banco. A [regra e seu aceite local](ambiente.md#rota-de-projetos) estão registrados no guia de ambiente. As rotas de tarefas e progresso seguem planejadas. O MariaDB dedicado usa `127.0.0.1:3307` com diretório de dados independente. A infraestrutura PDO aceita somente o destino e a conta de execução esperados para cada ambiente. O instalador local aplica o mesmo schema em dois bancos separados e limita as contas de execução às operações DML nas tabelas do próprio banco. O procedimento está no [guia de ambiente](ambiente.md#persistência-na-instância-dedicada).
+O VirtualHost dedicado encaminha `/api/projetos`, `/api/projetos/{id}`, `/api/projetos/{id}/tarefas` e `/api/tarefas/{id}` para `public/api/index.php`. A API valida os identificadores antes de acessar o banco. O guia de ambiente registra a [regra vigente e seu aceite local](ambiente.md#rotas-de-tarefas). O MariaDB dedicado usa `127.0.0.1:3307` com diretório de dados independente. A infraestrutura PDO aceita somente o destino e a conta de execução esperados para cada ambiente. O instalador local aplica o mesmo schema em dois bancos separados e limita as contas de execução às operações DML nas tabelas do próprio banco. O procedimento está no [guia de ambiente](ambiente.md#persistência-na-instância-dedicada).

@@ -24,7 +24,8 @@ function verificarContratoProjetos(): void
     $abrir = static function (): PDO {
         throw new RuntimeException('Uma requisição inválida tentou acessar o banco.');
     };
-    $origem = 'http://127.0.0.1:8082';
+    $origem = 'http://127.0.0.1:18082';
+    $lerOrigem = static fn (): string => $origem;
     $json = 'application/json';
     $rota = '/api/projetos';
     $casos = [
@@ -33,6 +34,7 @@ function verificarContratoProjetos(): void
         ['POST', $rota, null, $json, '{}', 403, null],
         ['POST', $rota, 'null', $json, '{}', 403, null],
         ['POST', $rota, 'http://localhost:8082', $json, '{}', 403, null],
+        ['POST', $rota, 'http://127.0.0.1:8082', $json, '{}', 403, null],
         ['POST', $rota, $origem, '', '{}', 415, null],
         ['POST', $rota, $origem, 'text/plain', '{}', 415, null],
         ['POST', $rota, $origem, 'application/json; charset=ISO-8859-1', '{}', 415, null],
@@ -71,7 +73,7 @@ function verificarContratoProjetos(): void
         ['DELETE', "$rota/1", $origem, '', ' ', 400, null],
     ];
     foreach ($casos as $indice => [$metodo, $caminho, $origin, $tipo, $corpo, $status, $campo]) {
-        $resposta = atenderProjetos($metodo, $caminho, $origin, $tipo, $corpo, $abrir);
+        $resposta = atenderProjetos($metodo, $caminho, $origin, $tipo, $corpo, $abrir, $lerOrigem);
         [$retorno, $dados] = $resposta;
         exigirProjeto(
             $retorno === $status && isset($dados['erro']['codigo'], $dados['erro']['mensagem'])
@@ -98,7 +100,8 @@ function verificarIntegracaoProjetos(): void
     $abrir = static fn (): PDO => $pdo;
     $id = null;
     $idTarefa = null;
-    $origem = 'http://127.0.0.1:8082';
+    $origem = Conexao::origemLocal(true);
+    $lerOrigem = static fn (): string => $origem;
 
     try {
         [$status, $criado] = atenderProjetos(
@@ -107,7 +110,8 @@ function verificarIntegracaoProjetos(): void
             $origem,
             'application/json; charset=UTF-8',
             json_encode(['nome' => " $nome ", 'descricao' => " $descricao "], JSON_THROW_ON_ERROR),
-            $abrir
+            $abrir,
+            $lerOrigem
         );
         exigirProjeto($status === 201, 'POST deveria retornar 201.');
         $id = (int) $criado['id'];
@@ -118,12 +122,12 @@ function verificarIntegracaoProjetos(): void
 
         // Outra conexão comprova que a gravação está visível após recarregar.
         $ler = static fn (): PDO => Conexao::local(true);
-        [$status, $lista] = atenderProjetos('GET', '/api/projetos', null, '', '', $ler);
+        [$status, $lista] = atenderProjetos('GET', '/api/projetos', null, '', '', $ler, $lerOrigem);
         exigirProjeto($status === 200 && in_array($criado, $lista, true), 'Projeto ausente da listagem.');
 
         $rota = "/api/projetos/$id";
         $chamar = static fn (string $metodo, string $corpo = ''): array =>
-            atenderProjetos($metodo, $rota, $origem, 'application/json', $corpo, $abrir);
+            atenderProjetos($metodo, $rota, $origem, 'application/json', $corpo, $abrir, $lerOrigem);
         exigirProjeto($chamar('GET') === [200, $criado], 'GET individual divergente.');
 
         [$status, $editado] = $chamar('PATCH', '{"nome":"  Nome atualizado  "}');
@@ -141,7 +145,7 @@ function verificarIntegracaoProjetos(): void
             'PATCH sem mudança em projeto existente deveria retornar 200.'
         );
         exigirProjeto(
-            atenderProjetos('GET', $rota, null, '', '', $ler) === [200, $editado],
+            atenderProjetos('GET', $rota, null, '', '', $ler, $lerOrigem) === [200, $editado],
             'Alteração ausente em nova conexão.'
         );
 

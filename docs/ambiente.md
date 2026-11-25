@@ -1,6 +1,6 @@
 # Ambiente local do DevFlow
 
-O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. O 02.3 fornece a infraestrutura de persistência descrita abaixo. O CRUD de projetos está disponível no navegador e na API. Este procedimento se destina ao ambiente acadêmico local.
+O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. O 02.3 fornece a infraestrutura de persistência descrita abaixo. O CRUD de projetos e tarefas está disponível no navegador e na API. Este procedimento se destina ao ambiente acadêmico local.
 
 ## Pré-requisitos verificados
 
@@ -57,7 +57,7 @@ Listen 127.0.0.1:8082
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1:8082$
     RewriteRule ^ - [F]
 
-    RewriteRule ^/api/projetos(?:/[^/]+)?$ /api/index.php [PT,L]
+    RewriteRule ^/api/(?:projetos(?:/[^/]+(?:/tarefas)?)?|tarefas/[^/]+)$ /api/index.php [PT,L]
 
     RewriteRule !^/(?:|index\.php|api/index\.php|assets/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*\.(?:css|js|png|jpe?g|gif|webp|svg|ico|woff2?))$ - [F]
 
@@ -74,7 +74,7 @@ Listen 127.0.0.1:8082
 </VirtualHost>
 ```
 
-A regra global de diretório bloqueia o caminho físico do checkout pelos hosts compartilhados. A autorização para `public/` está dentro do VirtualHost dedicado, que combina escuta no loopback, cliente local e validação de `Host`. O modelo encaminha as rotas de projetos ao despachante e restringe os demais caminhos às entradas e aos formatos estáticos listados. A inclusão de novas rotas exige um ajuste explícito e novos testes de isolamento.
+A regra global de diretório bloqueia o caminho físico do checkout pelos hosts compartilhados. A autorização para `public/` está dentro do VirtualHost dedicado, que combina escuta no loopback, cliente local e validação de `Host`. O modelo encaminha as rotas de projetos e tarefas ao despachante e restringe os demais caminhos às entradas e aos formatos estáticos listados. A inclusão de novas rotas exige um ajuste explícito e novos testes de isolamento.
 
 ## Backup, validação, aplicação e reversão
 
@@ -184,7 +184,7 @@ O executor abre apenas `devflow_test` com `devflow_test_app` na porta `3307`. Os
 
 ## Rota de projetos
 
-O modelo inclui a regra abaixo depois da rejeição de `Host` e antes da regra geral de bloqueio de URLs. Ela encaminha a coleção e os caminhos com um único segmento após `/api/projetos/`. A API valida esse segmento e responde em JSON quando o identificador é inválido.
+Na Sprint 03.2, a regra abaixo passou a encaminhar a coleção e as rotas individuais de projetos. A regra vigente está no [modelo do VirtualHost](#virtualhost-dedicado) e também encaminha as rotas de tarefas.
 
 ```apache
 RewriteRule ^/api/projetos(?:/[^/]+)?$ /api/index.php [PT,L]
@@ -198,7 +198,23 @@ Na Sprint 03.2, a sintaxe e os VirtualHosts foram validados antes do reinício m
 
 A escuta permaneceu exclusiva em `127.0.0.1:8082`. O `Host` indevido e os caminhos privados testados retornaram HTTP 403 no VirtualHost dedicado. O checkout e o acesso direto ao despachante retornaram 403 pelos hosts compartilhados em HTTP e HTTPS. A sondagem HTTPS local usou a validação do certificado desativada. A entrada pública da UC4 manteve HTTP 200.
 
-### Resultado do incremento 02.3
+## Rotas de tarefas
+
+A Sprint 04 ativou a regra abaixo, entre a validação de `Host` e o bloqueio geral de URLs. Ela preserva as rotas de projetos e acrescenta `/api/projetos/{id}/tarefas` e `/api/tarefas/{id}` ao mesmo despachante. A API valida os identificadores.
+
+```apache
+RewriteRule ^/api/(?:projetos(?:/[^/]+(?:/tarefas)?)?|tarefas/[^/]+)$ /api/index.php [PT,L]
+```
+
+Para atualizar uma instalação da Sprint 03.2, aplique o mesmo procedimento de backup e reversão da [regra de projetos](#rota-de-projetos). Substitua somente a regra de roteamento. No ambiente de referência, o backup teve o SHA-256 conferido, as ACLs foram preservadas, `httpd -t` retornou `Syntax OK` e `httpd -S` confirmou os VirtualHosts existentes antes do reinício manual do Apache.
+
+Após a ativação, a coleção e a consulta individual de projetos e a lista de tarefas por projeto retornaram HTTP 200 em JSON. IDs inválidos retornaram 404. As sondagens de escrita rejeitaram `POST` com JSON malformado, `PATCH` sem campos e `DELETE` com corpo, respectivamente com 400, 422 e 400.
+
+A porta 8082 permaneceu restrita a `127.0.0.1`. O `Host` indevido, os caminhos privados testados e o checkout nos hosts compartilhados HTTP e HTTPS retornaram 403. A sondagem HTTPS local usou validação de certificado desativada. A entrada pública da UC4 manteve HTTP 200.
+
+No aceite manual, o responsável confirmou o CRUD de tarefas, a ordenação, as prioridades, os estados e a persistência após recarga no navegador. O projeto usado no aceite foi excluído.
+
+## Resultado do incremento 02.3
 
 O provisionamento manual confirmou a identidade da instância dedicada e a disponibilidade dos nomes. A saída local registrou duas validações bem-sucedidas da persistência e a criação de `devflow` sem dados de teste. O teste independente foi confirmado pelo responsável pela execução local. O provisionamento não foi repetido para este registro.
 

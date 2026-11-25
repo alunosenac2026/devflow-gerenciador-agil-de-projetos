@@ -17,17 +17,35 @@ final class Conexao
             || in_array('STRICT_ALL_TABLES', $modos, true);
     }
 
-    public static function local(bool $testes = false): PDO
+    private static function configuracaoLocal(bool $testes): array
     {
+        static $configuracoes = [];
         $arquivo = dirname(__DIR__, 2) . '/config/' . ($testes ? 'local.test.php' : 'local.php');
 
         if (!is_file($arquivo) || !is_readable($arquivo)) {
             throw new RuntimeException('Configuração local indisponível.');
         }
+        return $configuracoes[$arquivo] ??= require $arquivo;
+    }
 
+    public static function origemLocal(bool $testes = false): string
+    {
         try {
-            $config = require $arquivo;
-            return self::abrir($config['database'] ?? [], $testes);
+            $origem = self::configuracaoLocal($testes)['app']['origin'] ?? null;
+        } catch (\Throwable) {
+            throw new RuntimeException('Configuração local indisponível.');
+        }
+        if (!is_string($origem) || !filter_var($origem, FILTER_VALIDATE_URL)
+            || !preg_match('~\Ahttps?://(?:127\.0\.0\.1|localhost|\[::1\])(?::[1-9][0-9]{0,4})?\z~', $origem)) {
+            throw new RuntimeException('Origem local inválida.');
+        }
+        return $origem;
+    }
+
+    public static function local(bool $testes = false): PDO
+    {
+        try {
+            return self::abrir(self::configuracaoLocal($testes)['database'] ?? [], $testes);
         } catch (\Throwable) {
             throw new RuntimeException('Não foi possível abrir a conexão local do DevFlow.');
         }

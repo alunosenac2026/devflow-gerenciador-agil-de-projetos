@@ -17,6 +17,18 @@ No incremento 02.3, a execução local reportou sucesso nos testes de persistên
 
 ## API e persistência
 
+Na Sprint 04, passaram 50 casos de contrato de tarefas e 39 de projetos. As integrações em `devflow_test` validaram CRUD, prioridades e estados, vínculo, ordenação, persistência em nova conexão e o conflito 409 ao tentar excluir um projeto com tarefas. Os testes de tarefas criam projetos sintéticos próprios e removem seus registros ao finalizar.
+
+```powershell
+& 'C:/xampp/php/php.exe' tests/tarefas.php
+& 'C:/xampp/php/php.exe' tests/tarefas.php --integracao
+& 'C:/xampp/php/php.exe' tests/projetos.php --integracao
+```
+
+Após a ativação das rotas, as sondagens confirmaram que a coleção e a consulta individual de projetos continuaram respondendo, que o isolamento HTTP/HTTPS foi preservado e que a entrada pública da UC4 continuou disponível. Consulte o [registro da Sprint 04](ambiente.md#rotas-de-tarefas).
+
+No aceite manual, o responsável confirmou cadastro, listagem, ordenação, edição, prioridades, estados, persistência após recarga e exclusão no navegador. O projeto descartável foi excluído.
+
 - [ ] Exercitar todas as rotas de projetos e tarefas e conferir códigos HTTP, JSON e ausência de corpo em 204.
 - [ ] Confirmar 400 para JSON malformado, 404 para recurso inexistente e 422 para campos inválidos, sem alterações persistidas.
 - [ ] Em POST e PATCH, verificar tipos, campos obrigatórios, espaços em branco, limites de 120 e 2.000 caracteres com conteúdo multibyte, nulidade, PATCH vazio, campos desconhecidos e rejeição de `posicao` e demais campos internos. Testar limpeza da descrição por `null` e preservação dos campos omitidos.

@@ -1,4 +1,4 @@
-'use strict';
+import { iniciarTarefas } from './tarefas.js';
 
 const rotaProjetos = '/api/projetos';
 const formulario = document.querySelector('#form-projeto');
@@ -11,6 +11,7 @@ const cancelar = document.querySelector('#cancelar-edicao');
 const tituloCadastro = document.querySelector('#titulo-cadastro');
 let editando = null;
 let ocupado = false;
+const tarefas = iniciarTarefas(requisitar);
 
 async function requisitar(rota = rotaProjetos, opcoes) {
     const resposta = await fetch(rota, opcoes);
@@ -19,7 +20,7 @@ async function requisitar(rota = rotaProjetos, opcoes) {
     }
     const tipo = resposta.headers.get('content-type') ?? '';
     if (!tipo.toLowerCase().startsWith('application/json')) {
-        throw new Error('A API de projetos está indisponível.');
+        throw new Error('A API está indisponível.');
     }
     const dados = await resposta.json();
     if (!resposta.ok) {
@@ -130,6 +131,7 @@ async function excluirProjeto(projeto, item) {
     try {
         await requisitar(rotaProjetos + '/' + projeto.id, { method: 'DELETE' });
         item.remove();
+        tarefas.removerProjeto(projeto.id);
         if (editando === projeto.id) {
             limparEdicao();
         }
@@ -151,6 +153,7 @@ async function carregarProjetos() {
     try {
         const projetos = await requisitar();
         lista.replaceChildren(...projetos.map(itemProjeto));
+        tarefas.carregarProjetos(projetos);
         atualizarEstadoLista();
     } catch {
         estadoLista.textContent = 'Não foi possível carregar os projetos.';
@@ -188,6 +191,7 @@ formulario.addEventListener('submit', async (evento) => {
         } else {
             lista.prepend(item);
         }
+        tarefas.salvarProjeto(projeto);
         atualizarEstadoLista();
         limparEdicao();
         mostrarMensagem(alterando ? 'Projeto atualizado.' : 'Projeto criado.', 'success');

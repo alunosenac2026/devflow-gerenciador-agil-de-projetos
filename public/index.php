@@ -12,7 +12,7 @@ header('X-Content-Type-Options: nosniff');
     <title>Projetos | DevFlow</title>
     <link rel="stylesheet" href="/assets/bootstrap.min.css">
     <link rel="stylesheet" href="/assets/projetos.css">
-    <script src="/assets/projetos.js" defer></script>
+    <script src="/assets/projetos.js" type="module"></script>
 </head>
 <body>
     <header class="marca">
@@ -57,6 +57,54 @@ header('X-Content-Type-Options: nosniff');
                 </div>
             </section>
         </div>
+        <section class="painel mt-4" aria-labelledby="titulo-tarefas">
+            <h2 id="titulo-tarefas">Tarefas do projeto</h2>
+            <label class="form-label" for="projeto-tarefas">Projeto</label>
+            <select class="form-select mb-3" id="projeto-tarefas" disabled>
+                <option value="">Selecione um projeto</option>
+            </select>
+            <p id="mensagem-tarefas" role="status" hidden></p>
+            <div id="conteudo-tarefas" class="row g-4 align-items-start" hidden>
+                <div class="col-lg-5">
+                    <h3 id="titulo-form-tarefa" class="h6">Nova tarefa</h3>
+                    <form id="form-tarefa" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="titulo-tarefa">Título</label>
+                            <input class="form-control" type="text" id="titulo-tarefa" name="titulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="descricao-tarefa">Descrição (opcional)</label>
+                            <textarea class="form-control" id="descricao-tarefa" name="descricao" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="prioridade-tarefa">Prioridade</label>
+                            <select class="form-select" id="prioridade-tarefa" name="prioridade">
+                                <option value="baixa">Baixa</option>
+                                <option value="media">Média</option>
+                                <option value="alta">Alta</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="status-tarefa">Estado</label>
+                            <select class="form-select" id="status-tarefa" name="status">
+                                <option value="a_fazer">A fazer</option>
+                                <option value="em_andamento">Em andamento</option>
+                                <option value="concluido">Concluído</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="salvar-tarefa" disabled>Criar tarefa</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" id="cancelar-tarefa" hidden>
+                            Cancelar edição
+                        </button>
+                    </form>
+                </div>
+                <div class="col-lg-7">
+                    <h3 id="titulo-lista-tarefas" class="h6">Tarefas cadastradas</h3>
+                    <p id="estado-lista-tarefas" class="text-body-secondary mb-0" role="status">Nenhuma tarefa cadastrada.</p>
+                    <ul id="lista-tarefas" class="lista-projetos list-unstyled mb-0"></ul>
+                </div>
+            </div>
+        </section>
     </main>
 </body>
 </html>
