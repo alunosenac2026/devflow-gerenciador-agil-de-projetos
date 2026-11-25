@@ -9,7 +9,7 @@
 | RF03 | Atribuir prioridade a cada tarefa. | São aceitos `baixa`, `media` e `alta`. Na criação, a ausência do campo resulta em `baixa`. |
 | RF04 | Apresentar Kanban e permitir movimentação entre estados. | O quadro exibe A fazer, Em andamento e Concluído. Uma tarefa nova começa em `a_fazer` quando o estado é omitido. É possível movê-la por teclado em qualquer direção e recarregar a página para confirmar a persistência. |
 | RF05 | Ordenar as tarefas de forma determinística. | Dentro de cada coluna, ordenar por `posicao` crescente e, em caso de empate, por `id` crescente. A posição padrão é 0 e o campo é interno, sem edição pelo cliente. |
-| RF06 | Mostrar indicadores de progresso por projeto. | Exibir contagens por estado e percentual arredondado ao inteiro mais próximo. Um projeto vazio exibe 0%. Criar, mover ou excluir uma tarefa atualiza os indicadores após sucesso, sem recarregar a página. |
+| RF06 | Mostrar indicadores de progresso por projeto. | Exibir total, contagens por estado, percentual arredondado ao inteiro mais próximo e barra de conclusão com rótulo acessível. Um projeto vazio exibe 0%. Os indicadores acompanham a seleção do projeto e são atualizados após criar, editar, mover ou excluir uma tarefa com sucesso, sem recarregar a página. |
 
 ## Requisitos não funcionais
 

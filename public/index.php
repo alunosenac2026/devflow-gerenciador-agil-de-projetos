@@ -65,6 +65,23 @@ header('X-Content-Type-Options: nosniff');
             </select>
             <div id="mensagem-tarefas" role="status" aria-atomic="true"></div>
             <div id="conteudo-tarefas" hidden>
+                <?php $estadosTarefa = ['a_fazer' => 'A fazer', 'em_andamento' => 'Em andamento', 'concluido' => 'Concluído']; ?>
+                <section class="border rounded-3 p-3 mb-4" aria-labelledby="titulo-progresso">
+                    <h3 id="titulo-progresso" class="h5 mb-3">Progresso do projeto</h3>
+                    <dl class="row row-cols-2 row-cols-md-4 gy-2 mb-3">
+                        <?php foreach (['total' => 'Total de tarefas'] + $estadosTarefa as $indicador => $rotulo): ?>
+                            <div class="col">
+                                <dt class="small"><?= $rotulo ?></dt>
+                                <dd id="progresso-<?= $indicador ?>" class="fs-5 fw-semibold mb-0">0</dd>
+                            </div>
+                        <?php endforeach; ?>
+                    </dl>
+                    <div class="d-flex justify-content-between gap-2 mb-1">
+                        <label for="barra-progresso" class="form-label small mb-0">Conclusão do projeto</label>
+                        <span id="percentual-progresso" class="small fw-semibold">0%</span>
+                    </div>
+                    <progress id="barra-progresso" class="barra-progresso d-block w-100" value="0" max="100"></progress>
+                </section>
                 <div class="mb-4">
                     <h3 id="titulo-form-tarefa" class="h6">Nova tarefa</h3>
                     <form id="form-tarefa" method="post" class="row g-3">
@@ -102,7 +119,7 @@ header('X-Content-Type-Options: nosniff');
                 </div>
                 <h3 id="titulo-lista-tarefas" class="h5 mb-3">Quadro de tarefas</h3>
                 <div id="quadro-tarefas" class="row row-cols-1 row-cols-lg-3 g-3">
-                    <?php foreach (['a_fazer' => 'A fazer', 'em_andamento' => 'Em andamento', 'concluido' => 'Concluído'] as $estado => $rotulo): ?>
+                    <?php foreach ($estadosTarefa as $estado => $rotulo): ?>
                         <section class="col" data-estado="<?= $estado ?>" aria-labelledby="coluna-<?= $estado ?>">
                             <div class="kanban-coluna h-100">
                                 <h4 id="coluna-<?= $estado ?>" class="h6 mb-3"><?= $rotulo ?></h4>

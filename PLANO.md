@@ -27,7 +27,9 @@ O teste por outro dispositivo da rede permanece pendente. A Sprint 03.1 validou 
 
 A Sprint 04 concluiu o CRUD de tarefas no projeto selecionado, com prioridades, estados e ordenação por posição e ID. O contrato e a integração em `devflow_test` passaram. Após a ativação das rotas, o responsável confirmou cadastro, listagem, edição, persistência após recarga e exclusão pelo navegador. As verificações técnicas confirmaram o isolamento HTTP/HTTPS e a disponibilidade da entrada pública da UC4.
 
-A Sprint 05 concluiu o quadro Kanban com três colunas, prioridade identificada por texto e cor e movimentação por teclado. Os testes automatizados confirmaram as seis transições em `devflow_test`, com persistência em nova leitura, e verificaram o comportamento da interface no Chrome com respostas simuladas. O responsável confirmou separadamente o aceite no navegador com a API real. Os indicadores de progresso permanecem planejados.
+A Sprint 05 concluiu o quadro Kanban com três colunas, prioridade identificada por texto e cor e movimentação por teclado. Os testes automatizados confirmaram as seis transições em `devflow_test`, com persistência em nova leitura, e verificaram o comportamento da interface no Chrome com respostas simuladas. O responsável confirmou separadamente o aceite no navegador com a API real.
+
+A Sprint 06 concluiu os indicadores de progresso do projeto selecionado. No ambiente real, o responsável confirmou o total de tarefas, as contagens por estado, a atualização após movimentação, o arredondamento para 67%, a conclusão de 100% e o retorno a 0% após excluir todas as tarefas. Os [registros de teste](docs/testes.md#interface-e-regressão) distinguem o aceite manual das verificações automatizadas com API simulada.
 
 ## Cronograma
 
@@ -36,8 +38,8 @@ O prazo oficial de entrega informado pelo professor é **26/11/2026 às 23h59**.
 | Data de 2026 | Entrega | Critério de aceite |
 |---|---|---|
 | Até 24/11 | Concluir ambiente, persistência, CRUD de projetos e tarefas e Kanban. | Aceites e verificações registrados em Incrementos e aceite. |
-| 25/11 | Implementar e validar os indicadores de progresso. | Conferir contagens por estado, arredondamento e 0% em projeto vazio. Atualizar após criar, mover ou excluir tarefas com sucesso e preservar os valores exibidos em caso de falha. |
-| 26/11, até 23h59 | Concluir a regressão, fechar a documentação e entregar o MVP. | Executar a matriz final, registrar resultados e pendências e preparar a versão de entrega. |
+| Até 25/11 | Concluir e validar os indicadores de progresso. | Concluído na Sprint 06, com aceite manual e evidências dos testes automatizados registrados. |
+| 26/11, até 23h59 | Sprint 07. Concluir a regressão, fechar a documentação e entregar o MVP. | Consolidar a matriz final, registrar resultados e pendências e preparar a versão de entrega. |
 
 Os marcos dependem da autorização da implementação e de eventuais ajustes no ambiente. Se a publicação local segura atrasar, priorizar a validação de persistência em banco de teste e manter o aceite de implantação pendente até confirmar o isolamento.
 

@@ -7,7 +7,7 @@
 | `public/index.php` | Entrada da interface de projetos e Kanban. |
 | `public/api/index.php` | Entrada da API, despacho por método e rota, leitura de JSON e resposta HTTP. |
 | `public/assets/` | JavaScript nativo, CSS e Bootstrap 5 local. |
-| `app/Projetos/` | Validação, persistência e regras de projeto, incluindo progresso e exclusão. |
+| `app/Projetos/` | Validação, persistência e regras de projeto, incluindo a exclusão. |
 | `app/Tarefas/` | Validação, persistência, regras de estado e ordenação de tarefas. |
 | `app/Infra/` | Conexão PDO e mecanismos compartilhados de resposta e erro. |
 | `config/` | Configuração local do banco. Valores sensíveis ficam fora do Git. |
@@ -31,9 +31,9 @@ A relação Projeto–Tarefa é de um para muitos. A chave estrangeira restringe
 
 | Método e rota lógica | Sucesso | Operação |
 |---|---|---|
-| GET /api/projetos | 200 | Listar projetos com progresso. |
+| GET /api/projetos | 200 | Listar projetos. |
 | POST /api/projetos | 201 | Criar projeto. |
-| GET /api/projetos/{id} | 200 | Consultar projeto e progresso. |
+| GET /api/projetos/{id} | 200 | Consultar projeto. |
 | PATCH /api/projetos/{id} | 200 | Editar projeto. |
 | DELETE /api/projetos/{id} | 204 | Excluir projeto vazio. |
 | GET /api/projetos/{id}/tarefas | 200 | Listar tarefas do projeto ordenadas por posição e ID. |
@@ -44,7 +44,7 @@ A relação Projeto–Tarefa é de um para muitos. A chave estrangeira restringe
 
 O contrato reserva 400 para JSON malformado, 404 para recurso inexistente, 409 para exclusão de projeto com tarefas e 422 para dados inválidos. Erros usam uma estrutura JSON estável com código e mensagem, com indicação de campo quando aplicável. Respostas 204 são sem corpo. O vínculo da tarefa vem da rota na criação e permanece o mesmo na edição.
 
-Na Sprint 03.1, `GET /api/projetos` devolve um array de projetos, do ID mais recente ao mais antigo, e `POST /api/projetos` devolve o projeto criado. Ambos retornam `id`, `nome`, `descricao`, `criado_em` e `atualizado_em`. O resumo de progresso entra com a fatia de indicadores. O objeto `erro` contém `codigo`, `mensagem` e, quando aplicável, `campo`. Métodos não atendidos na rota retornam 405 com `Allow: GET, POST`.
+Na Sprint 03.1, `GET /api/projetos` devolve um array de projetos, do ID mais recente ao mais antigo, e `POST /api/projetos` devolve o projeto criado. Ambos retornam `id`, `nome`, `descricao`, `criado_em` e `atualizado_em`. O objeto `erro` contém `codigo`, `mensagem` e, quando aplicável, `campo`. Métodos não atendidos na rota retornam 405 com `Allow: GET, POST`.
 
 Na Sprint 03.2, as rotas individuais aceitam IDs de 1 a 4294967295, conforme a chave `INT UNSIGNED`. `GET` e `PATCH` devolvem o projeto no mesmo formato da criação. `DELETE` devolve 204 sem corpo ou 409 quando a chave estrangeira impede a exclusão por existirem tarefas. Métodos não atendidos na rota individual retornam 405 com `Allow: GET, PATCH, DELETE`.
 
@@ -65,6 +65,8 @@ As rotas POST e PATCH recebem um objeto JSON em UTF-8. Os limites são contados 
 ### Quadro Kanban
 
 A interface agrupa as tarefas do projeto selecionado pelo `status` retornado pela API e ordena cada coluna por `posicao` e `id`. O controle nativo de destino oferece os dois estados alternativos. A confirmação envia apenas `status` ao `PATCH /api/tarefas/{id}`. A resposta de sucesso atualiza o cartão e devolve o foco ao controle da tarefa. Em caso de erro, a interface comunica a falha e preserva o cartão na coluna anterior. Criar, editar e excluir tarefas continuam usando a mesma API.
+
+O resumo de progresso usa a mesma lista de tarefas confirmada pela API e as mesmas contagens do quadro. A interface exibe o total, as contagens por estado e o percentual inteiro de conclusão. O cálculo é `Math.round(concluidas * 100 / total)`, com 0% quando o total é zero. A barra nativa `<progress>` recebe esse percentual e tem um rótulo associado. O resumo acompanha a renderização após selecionar o projeto ou confirmar uma gravação. Uma falha preserva os valores já exibidos. A API e o banco mantêm os contratos e o armazenamento existentes.
 
 ### Política de escrita
 

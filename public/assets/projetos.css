@@ -68,6 +68,11 @@ h1 {
     white-space: pre-wrap;
 }
 
+.barra-progresso {
+    height: .9rem;
+    accent-color: var(--df-azul);
+}
+
 .kanban-coluna {
     padding: .85rem;
     border: 1px solid var(--df-borda);

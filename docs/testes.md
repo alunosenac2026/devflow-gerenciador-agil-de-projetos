@@ -50,6 +50,11 @@ Evidências da Sprint 05
 
 ## Interface e regressão
 
+Evidências da Sprint 06
+
+- **Aceite manual no ambiente real.** O responsável confirmou o total de tarefas, as contagens por estado e a atualização após movimentação. Também conferiu 67% de conclusão parcial com arredondamento correto, 100% de conclusão integral e o retorno a 0% após excluir todas as tarefas.
+- **Teste automatizado com API simulada.** No Chrome headless, o teste verificou projetos vazios, sem concluídas, parciais e completos e os percentuais de 0%, 33%, 67%, 13%, 58% e 100%. Verificou atualização após criar, editar, mover e excluir tarefas e preservação dos indicadores quando cada operação falhou. Também verificou troca de projeto, recarga, quantidade de requisições, rótulo e valores da barra na árvore de acessibilidade e layout em 390 e 1280 px.
+
 - [ ] Criar, consultar, editar e excluir projetos e tarefas pela interface.
 - [ ] Verificar as três colunas e os estados vazios. Mover tarefas entre colunas pelo teclado e conferir foco, rótulo e mensagem de resultado.
 - [ ] Executar as seis transições entre estados pelo controle: A fazer → Em andamento, A fazer → Concluído, Em andamento → A fazer, Em andamento → Concluído, Concluído → A fazer e Concluído → Em andamento. Conferir estado retornado pela API, coluna e persistência após recarga.
@@ -67,7 +72,7 @@ Evidências da Sprint 05
 | RF03 | Três prioridades, valor inválido e padrão `baixa`. |
 | RF04 | Três estados, padrão `a_fazer`, seis transições e persistência. |
 | RF05 | Ordem por posição e ID, padrão 0, rejeição de escrita pelo cliente e preservação ao mover. |
-| RF06 | Contagens, arredondamento, projeto vazio e atualização após cada operação aplicável. |
+| RF06 | Total, contagens por estado, barra acessível, arredondamento, projeto vazio, troca de projeto, recarga e atualização após cada operação aplicável. |
 | RNF01 | Versões, PHP/PDO sob Apache, aplicação do esquema no MariaDB e recarga no navegador. |
 | RNF02 | Validação no servidor, revisão da parametrização, acentos e renderização como texto. |
 | RNF03 | HTTP/HTTPS local e pela rede, caminhos privados, acesso ao banco e erros genéricos. |

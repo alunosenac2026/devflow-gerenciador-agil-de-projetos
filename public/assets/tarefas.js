@@ -10,11 +10,18 @@ export function iniciarTarefas(requisitar) {
     const salvar = document.querySelector('#salvar-tarefa');
     const cancelar = document.querySelector('#cancelar-tarefa');
     const quadro = document.querySelector('#quadro-tarefas');
-    const colunas = [...quadro.querySelectorAll('[data-estado]')].map(coluna => ({
-        estado: coluna.dataset.estado,
-        lista: coluna.querySelector('ul'),
-        vazia: coluna.querySelector('.kanban-vazia'),
-    }));
+    const totalProgresso = document.querySelector('#progresso-total');
+    const percentualProgresso = document.querySelector('#percentual-progresso');
+    const barraProgresso = document.querySelector('#barra-progresso');
+    const colunas = [...quadro.querySelectorAll('[data-estado]')].map(coluna => {
+        const estado = coluna.dataset.estado;
+        return {
+            estado,
+            lista: coluna.querySelector('ul'),
+            vazia: coluna.querySelector('.kanban-vazia'),
+            contagem: document.getElementById('progresso-' + estado),
+        };
+    });
     const mensagem = document.querySelector('#mensagem-tarefas');
     const titulo = formulario.elements.namedItem('titulo');
     const campoEstado = formulario.elements.namedItem('status');
@@ -173,11 +180,19 @@ export function iniciarTarefas(requisitar) {
 
     function renderizarTarefas() {
         tarefas.sort((a, b) => a.posicao - b.posicao || a.id - b.id);
+        const contagens = {};
         for (const coluna of colunas) {
             const itens = tarefas.filter(tarefa => tarefa.status === coluna.estado);
             coluna.lista.replaceChildren(...itens.map(itemTarefa));
             coluna.vazia.hidden = itens.length > 0;
+            contagens[coluna.estado] = itens.length;
+            coluna.contagem.textContent = itens.length;
         }
+        const total = tarefas.length;
+        const percentual = total === 0 ? 0 : Math.round(contagens.concluido * 100 / total);
+        totalProgresso.textContent = total;
+        percentualProgresso.textContent = percentual + '%';
+        barraProgresso.value = percentual;
     }
 
     async function moverTarefa(tarefa, destino) {
