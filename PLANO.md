@@ -37,6 +37,8 @@ O refinamento da interface adotou temas claro e escuro, paleta índigo e cinza-a
 
 ## Cronograma
 
+A revisão documental complementar consolidou a [primeira instalação e o uso cotidiano no Windows](docs/instalacao.md). O roteiro identifica os pré-requisitos, a preparação offline da instância MariaDB, o ponto de partida para o provisionamento e as condições de interrupção. A validação integral em outro computador permanece pendente.
+
 O prazo oficial de entrega informado pelo professor é **26/11/2026 às 23h59**.
 
 | Data de 2026 | Entrega | Critério de aceite |

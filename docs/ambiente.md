@@ -1,5 +1,7 @@
 # Ambiente local do DevFlow
 
+[Primeira instalação e uso cotidiano no Windows](instalacao.md) · [Visão geral do projeto](../README.md)
+
 O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.1:8082/`. O incremento 02.1 entregou a estrutura do repositório e o exemplo de configuração. O 02.2 aplicou e verificou localmente o isolamento web. O 02.3 fornece a infraestrutura de persistência descrita abaixo. O CRUD de projetos e tarefas está disponível no navegador e na API. Este procedimento se destina ao ambiente acadêmico local.
 
 ## Pré-requisitos verificados
@@ -14,6 +16,8 @@ O VirtualHost do DevFlow está ativo no XAMPP de referência em `http://127.0.0.
 A configuração usa os módulos de autorização do Apache, `mod_rewrite` e `mod_proxy`. O módulo PHP do XAMPP executa a entrada pública. Quando `mod_userdir` estiver carregado, ele é desabilitado no VirtualHost dedicado. Para verificar os módulos, use `httpd -M` com os mesmos argumentos de raiz e configuração da validação abaixo.
 
 ## Estrutura e instalação em outra máquina
+
+Para uma primeira instalação, siga o [roteiro numerado](instalacao.md#primeira-instalação). Esta seção preserva a configuração de referência e o histórico dos testes.
 
 1. Prepare o Windows com XAMPP, PHP 8.2 e as extensões PDO, `pdo_mysql` e `mbstring`. Habilite os módulos do Apache indicados acima e reserve as portas locais 8082 para o Apache e 3307 para o banco dedicado.
 2. Defina a raiz do XAMPP, por exemplo `C:/xampp`, e obtenha o checkout do DevFlow. Nos blocos Apache abaixo, substitua `CAMINHO_DO_CHECKOUT` pelo caminho absoluto, com barras `/`. O checkout contém `public/`, `app/`, `config/`, `database/`, `docs/` e `tests/`. `var/log/` é local e ignorado pelo Git.
