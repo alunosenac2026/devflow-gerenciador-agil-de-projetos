@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 2 136 136">
+    <g id="panda">
+        <circle cx="39" cy="33" r="22" fill="var(--df-panda-orelhas, #818cf8)"/>
+        <circle cx="121" cy="33" r="22" fill="var(--df-panda-orelhas, #818cf8)"/>
+        <path d="M80 20 C115 20 139 43 139 78 C139 112 114 130 80 130 C46 130 21 112 21 78 C21 43 45 20 80 20Z" fill="var(--df-panda-face, #e2e8f0)"/>
+        <ellipse cx="51" cy="73" rx="18" ry="25" transform="rotate(30 51 73)" fill="var(--df-panda-manchas, #1e293b)"/>
+        <ellipse cx="109" cy="73" rx="18" ry="25" transform="rotate(-30 109 73)" fill="var(--df-panda-manchas, #1e293b)"/>
+        <path d="M55 61 L43 72 L55 83 M105 61 L117 72 L105 83" stroke="var(--df-panda-codigo, #a5b4fc)" stroke-width="var(--df-panda-traco, 6)" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M72 94 Q80 89 88 94 L80 102Z" fill="var(--df-panda-manchas, #1e293b)"/>
+        <path d="M80 101 V107 M69 109 Q80 119 91 109" stroke="var(--df-panda-manchas, #1e293b)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    </g>
+</svg>

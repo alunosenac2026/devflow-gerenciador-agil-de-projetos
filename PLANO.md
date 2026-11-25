@@ -33,6 +33,8 @@ A Sprint 06 concluiu os indicadores de progresso do projeto selecionado. No ambi
 
 A Sprint 07 aprovou as três suítes de regressão e os 89 casos de contrato. O aceite complementar confirmou a alternância entre projetos e a atualização dos indicadores correspondentes. O MVP está apto para entrega acadêmica no ambiente de referência, sem defeitos bloqueantes identificados. O aceite manual da recarga dos indicadores e da edição pelo formulário aguarda confirmação explícita. O teste de isolamento em outro dispositivo permanece pendente. Consulte a [regressão e a matriz de cobertura](docs/testes.md#regressão-integrada-da-sprint-07).
 
+O refinamento da interface adotou temas claro e escuro, paleta índigo e cinza-ardósia e a marca do panda com símbolos de código nos olhos. Os [testes automatizados de interface](docs/testes.md#refinamento-visual-e-marca) registram os resultados com API simulada. O aceite visual final aguarda confirmação do responsável.
+
 ## Cronograma
 
 O prazo oficial de entrega informado pelo professor é **26/11/2026 às 23h59**.

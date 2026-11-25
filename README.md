@@ -1,4 +1,6 @@
-# devflow-gerenciador-agil-de-projetos
+# DevFlow — Gerenciador Ágil de Projetos
+
+<img src="public/assets/favicon.svg" alt="" width="96" height="96">
 
 ## Estrutura inicial
 
@@ -15,6 +17,8 @@
 Com o VirtualHost configurado e o Apache em execução, use [http://127.0.0.1:8082/](http://127.0.0.1:8082/) para criar, listar, editar e excluir projetos. Ao excluir, a interface pede confirmação. Projetos com tarefas vinculadas ficam protegidos pela API, que retorna HTTP 409. O [guia de ambiente](docs/ambiente.md#rota-de-projetos) descreve o roteamento e as verificações locais.
 
 Em **Tarefas do projeto**, escolha um projeto para ver o quadro Kanban e o progresso, com total de tarefas, contagens por estado e percentual de conclusão. Cada cartão mostra a prioridade e oferece as ações **Editar**, **Excluir** e **Mover**. Para mover uma tarefa, escolha o destino em **Mover para** e confirme em **Mover**. Em cada coluna, o quadro respeita posição e ID. O quadro e o progresso são atualizados após uma operação bem-sucedida. A seleção do projeto é recuperada após recarregar a página. O guia de ambiente descreve as [rotas de tarefas e sua validação](docs/ambiente.md#rotas-de-tarefas).
+
+Use **Modo escuro** no cabeçalho para alternar o tema. A preferência fica salva no navegador quando o armazenamento local está disponível. Na primeira visita vale o tema do sistema.
 
 O prazo oficial e os marcos de entrega estão no [cronograma do MVP](PLANO.md#cronograma).
 

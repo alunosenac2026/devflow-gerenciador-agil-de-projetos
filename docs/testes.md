@@ -98,3 +98,10 @@ O MVP está apto para entrega acadêmica no ambiente de referência. A regressã
 | RNF04 | Movimentação acessível | Rótulo, teclado, foco e mensagens verificados no Chrome com API simulada. O aceite do Kanban com API real foi registrado sem detalhamento individual desses controles. |
 | RNF05 | Proteção das escritas e contrato | Contratos confirmaram rejeição de origem, tipo de conteúdo e campos indevidos. A integração confirmou preservação dos dados após edição inválida. |
 | RNF06 | Preservação da interface diante de falhas | Com API simulada, as falhas de criação, edição, movimentação e exclusão comunicaram o erro e preservaram os indicadores e o quadro confirmado. |
+
+## Refinamento visual e marca
+
+- **Interface automatizada.** No Chrome headless com API simulada, os temas claro e escuro passaram em 390 e 1280 px. Nas amostras de texto, o menor contraste foi de 6,50:1 no claro e 7,27:1 no escuro. Também foram verificadas bordas de campos e a barra de progresso.
+- **Tema e regressão automatizados.** A preferência do sistema, a alternância por teclado, a persistência e o funcionamento sem `localStorage` foram verificados. A troca de tema preservou o projeto selecionado, o quadro e o progresso, sem novas chamadas à API. O teste direcionado cobriu CRUD, confirmação e cancelamento, Kanban, ordenação e preservação da interface diante de falha.
+- **Marca e favicon.** No Chrome headless com API simulada, o cabeçalho manteve 65 px em 390 e 1280 px, nos dois temas. O link da marca teve um único nome acessível, DevFlow, e a navegação por teclado permaneceu disponível. As capturas confirmaram a inversão de face e manchas, com os símbolos de código preservados. O favicon retornou HTTP 200 como SVG e manteve face, manchas e índigo na rasterização a 16 e 32 px.
+- **Aceite manual.** O responsável aprovou a geometria vetorial de referência. O aceite da apresentação final no cabeçalho, dos temas e do favicon aguarda confirmação.

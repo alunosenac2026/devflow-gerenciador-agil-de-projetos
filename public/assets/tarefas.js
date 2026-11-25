@@ -1,7 +1,7 @@
 const prioridades = { baixa: 'Baixa', media: 'Média', alta: 'Alta' };
 const estados = { a_fazer: 'A fazer', em_andamento: 'Em andamento', concluido: 'Concluído' };
 
-export function iniciarTarefas(requisitar) {
+export function iniciarTarefas(requisitar, confirmarExclusao = pergunta => window.confirm(pergunta)) {
     const seletor = document.querySelector('#projeto-tarefas');
     const conteudo = document.querySelector('#conteudo-tarefas');
     const formulario = document.querySelector('#form-tarefa');
@@ -289,7 +289,11 @@ export function iniciarTarefas(requisitar) {
     }
 
     async function excluirTarefa(tarefa) {
-        if (ocupado || !window.confirm('Excluir a tarefa "' + tarefa.titulo + '"?')) {
+        if (ocupado) {
+            return;
+        }
+        const confirmado = await confirmarExclusao('Excluir a tarefa "' + tarefa.titulo + '"?');
+        if (!confirmado || ocupado) {
             return;
         }
         const selecionado = projetoId;

@@ -9,9 +9,28 @@ const lista = document.querySelector('#lista-projetos');
 const recarregar = document.querySelector('#recarregar-projetos');
 const cancelar = document.querySelector('#cancelar-edicao');
 const tituloCadastro = document.querySelector('#titulo-cadastro');
+const dialogoExclusao = document.querySelector('#confirmar-exclusao');
+const textoConfirmacao = document.querySelector('#texto-confirmacao');
 let editando = null;
 let ocupado = false;
-const tarefas = iniciarTarefas(requisitar);
+const tarefas = iniciarTarefas(requisitar, confirmarExclusao);
+
+async function confirmarExclusao(pergunta) {
+    if (typeof dialogoExclusao.showModal !== 'function') {
+        return window.confirm(pergunta);
+    }
+    if (dialogoExclusao.open) {
+        return false;
+    }
+    textoConfirmacao.textContent = pergunta;
+    dialogoExclusao.returnValue = '';
+    dialogoExclusao.showModal();
+    return new Promise(resolve => {
+        dialogoExclusao.addEventListener('close', () => {
+            resolve(dialogoExclusao.returnValue === 'excluir');
+        }, { once: true });
+    });
+}
 
 async function requisitar(rota = rotaProjetos, opcoes) {
     const resposta = await fetch(rota, opcoes);
@@ -124,7 +143,11 @@ async function iniciarEdicao(id) {
 }
 
 async function excluirProjeto(projeto, item) {
-    if (ocupado || !window.confirm('Excluir o projeto "' + projeto.nome + '"?')) {
+    if (ocupado) {
+        return;
+    }
+    const confirmado = await confirmarExclusao('Excluir o projeto "' + projeto.nome + '"?');
+    if (!confirmado || ocupado) {
         return;
     }
     bloquearAcoes(true);
