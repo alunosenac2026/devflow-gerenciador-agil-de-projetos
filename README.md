@@ -18,9 +18,13 @@ Em **Tarefas do projeto**, escolha um projeto para ver o quadro Kanban e o progr
 
 O prazo oficial e os marcos de entrega estão no [cronograma do MVP](PLANO.md#cronograma).
 
+O MVP está apto para entrega acadêmica no ambiente de referência. A Sprint 07 aprovou as três suítes de regressão e 89 casos de contrato. Os aceites manuais, as verificações simuladas e as pendências constam no [relatório de validação](docs/testes.md#regressão-integrada-da-sprint-07).
+
 ## Persistência local
 
 O DevFlow usa a instância dedicada MariaDB 10.4.32 em `127.0.0.1:3307`. Após iniciar a instância, siga o [procedimento de instalação e testes](docs/ambiente.md#persistência-na-instância-dedicada) para aplicar `database/schema.sql`, criar as contas restritas e gerar `config/local.php` e `config/local.test.php`. Ambos os arquivos são ignorados pelo Git e ficam fora de `public/`.
+
+Em outra máquina, prepare o Windows com XAMPP, o VirtualHost local e a instância MariaDB dedicada já inicializada, com conta administrativa local. O diretório de dados é validado pelo provisionador. Consulte os [pré-requisitos e caminhos](docs/ambiente.md#estrutura-e-instalação-em-outra-máquina).
 
 No ambiente acadêmico de referência, o provisionamento local concluiu a instalação de `devflow_test`, validou a persistência e criou `devflow` sem dados de teste. As configurações locais foram verificadas por metadados e permanecem protegidas por NTFS e ignoradas pelo Git.
 

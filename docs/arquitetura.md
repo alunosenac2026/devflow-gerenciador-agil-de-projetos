@@ -16,7 +16,7 @@
 
 Interface e API operam na mesma origem. A API valida a entrada antes de acionar as regras de negócio. A persistência usa PDO, parâmetros e conexão com `utf8mb4`. Os erros externos são genéricos quando houver falha interna. Registros de diagnóstico ficam em local privado.
 
-O banco de desenvolvimento identificado no XAMPP é MariaDB 10.4.32. O acesso permanece via PDO com `pdo_mysql`. A compatibilidade dos scripts SQL será confirmada no banco de teste antes do aceite.
+O banco de desenvolvimento usa a instância dedicada MariaDB 10.4.32 do XAMPP, acessada via PDO com `pdo_mysql`. O esquema foi provisionado nesse ambiente e validado em `devflow_test`, inclusive na regressão da Sprint 07.
 
 ## Modelagem
 

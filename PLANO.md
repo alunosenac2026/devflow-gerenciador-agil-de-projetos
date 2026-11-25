@@ -13,7 +13,7 @@ O DevFlow é o projeto final da UC6 do SENAC. O objetivo é permitir que uma pes
 
 ## Arquitetura
 
-Monólito modular em PHP 8.2 com Projetos, Tarefas e infraestrutura compartilhada. A API JSON usa PDO com `pdo_mysql`. O banco de desenvolvimento identificado no XAMPP é MariaDB 10.4.32, sujeito à confirmação da compatibilidade dos scripts SQL. A interface usa HTML5, CSS3, Bootstrap 5 local e JavaScript nativo. Consulte [requisitos](docs/requisitos.md), [arquitetura](docs/arquitetura.md) e [testes](docs/testes.md).
+Monólito modular em PHP 8.2 com Projetos, Tarefas e infraestrutura compartilhada. A API JSON usa PDO com `pdo_mysql`. O esquema foi provisionado e validado em uma instância dedicada do MariaDB 10.4.32 do XAMPP, com integração executada em `devflow_test`. A interface usa HTML5, CSS3, Bootstrap 5 local e JavaScript nativo. Consulte [requisitos](docs/requisitos.md), [arquitetura](docs/arquitetura.md) e [testes](docs/testes.md).
 
 ## Incrementos e aceite
 
@@ -31,6 +31,8 @@ A Sprint 05 concluiu o quadro Kanban com três colunas, prioridade identificada 
 
 A Sprint 06 concluiu os indicadores de progresso do projeto selecionado. No ambiente real, o responsável confirmou o total de tarefas, as contagens por estado, a atualização após movimentação, o arredondamento para 67%, a conclusão de 100% e o retorno a 0% após excluir todas as tarefas. Os [registros de teste](docs/testes.md#interface-e-regressão) distinguem o aceite manual das verificações automatizadas com API simulada.
 
+A Sprint 07 aprovou as três suítes de regressão e os 89 casos de contrato. O aceite complementar confirmou a alternância entre projetos e a atualização dos indicadores correspondentes. O MVP está apto para entrega acadêmica no ambiente de referência, sem defeitos bloqueantes identificados. O aceite manual da recarga dos indicadores e da edição pelo formulário aguarda confirmação explícita. O teste de isolamento em outro dispositivo permanece pendente. Consulte a [regressão e a matriz de cobertura](docs/testes.md#regressão-integrada-da-sprint-07).
+
 ## Cronograma
 
 O prazo oficial de entrega informado pelo professor é **26/11/2026 às 23h59**.
@@ -39,9 +41,9 @@ O prazo oficial de entrega informado pelo professor é **26/11/2026 às 23h59**.
 |---|---|---|
 | Até 24/11 | Concluir ambiente, persistência, CRUD de projetos e tarefas e Kanban. | Aceites e verificações registrados em Incrementos e aceite. |
 | Até 25/11 | Concluir e validar os indicadores de progresso. | Concluído na Sprint 06, com aceite manual e evidências dos testes automatizados registrados. |
-| 26/11, até 23h59 | Sprint 07. Concluir a regressão, fechar a documentação e entregar o MVP. | Consolidar a matriz final, registrar resultados e pendências e preparar a versão de entrega. |
+| 26/11, até 23h59 | Entregar o MVP. | Regressão e matriz de rastreabilidade consolidadas na Sprint 07. Versão de entrega pendente de aprovação do versionamento. |
 
-Os marcos dependem da autorização da implementação e de eventuais ajustes no ambiente. Se a publicação local segura atrasar, priorizar a validação de persistência em banco de teste e manter o aceite de implantação pendente até confirmar o isolamento.
+A publicação da versão de entrega depende da aprovação do versionamento.
 
 ## Riscos
 

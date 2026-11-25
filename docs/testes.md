@@ -4,7 +4,7 @@ Use dados descartáveis em um banco exclusivo de testes. Execute as verificaçõ
 
 ## Banco e ambiente
 
-Após o provisionamento local, execute o teste de integração da persistência conforme o [guia de ambiente](ambiente.md#reexecutar-os-testes). O executor usa somente o banco de testes e a conta restrita. Cobre Unicode, valores padrão, timestamps, recusas por chave estrangeira, valores inválidos de prioridade e estado, ordenação, rollback e permissões. A validação HTTP da API faz parte do incremento seguinte.
+Após o provisionamento local, execute o teste de integração da persistência conforme o [guia de ambiente](ambiente.md#reexecutar-os-testes). O executor usa somente o banco de testes e a conta restrita. Cobre Unicode, valores padrão, timestamps, recusas por chave estrangeira, valores inválidos de prioridade e estado, ordenação, rollback e permissões. As sondagens HTTP da API estão registradas nas evidências da Sprint 04 e na [regressão integrada da Sprint 07](#regressão-integrada-da-sprint-07).
 
 No incremento 02.3, a execução local reportou sucesso nos testes de persistência em `devflow_test` e a criação de `devflow` sem dados de teste. Consulte o [registro do ambiente](ambiente.md#resultado-do-incremento-023) para a evidência e a conferência dos arquivos locais.
 
@@ -63,19 +63,38 @@ Evidências da Sprint 06
 - [ ] Simular falhas de criação, edição, movimentação e exclusão. Confirmar que listas, quadro e indicadores preservam o último estado confirmado e que a falha é perceptível.
 - [ ] Confirmar que conteúdo semelhante a HTML em títulos e descrições é apresentado como texto.
 
+## Regressão integrada da Sprint 07
+
+A rodada consolidada foi executada na branch `desenvolvimento-validacao-final`, revisão `a544556`. As três suítes passaram, com **89 casos de contrato aprovados**. As integrações utilizaram `devflow_test`.
+
+| Verificação executada | Resultado |
+|---|---|
+| `tests/persistencia.php` | Aprovado. Integridade referencial, valores padrão, timestamps, Unicode, ordenação, rollback e privilégios restritos. |
+| `tests/projetos.php --integracao` | Aprovado. 39 casos de contrato, CRUD de projetos e HTTP 409 ao excluir projeto com tarefas. |
+| `tests/tarefas.php --integracao` | Aprovado. 50 casos de contrato, CRUD de tarefas, vínculo, prioridades, ordenação e seis transições do Kanban, com nova leitura após cada movimento. |
+| Sintaxe e Apache local | Sintaxe aprovada em 13 arquivos PHP e 2 JavaScript próprios. A página e os assets retornaram HTTP 200. As três rotas sondadas com ID inválido retornaram HTTP 404 em JSON. As portas 8082 e 3307 estavam restritas ao loopback. |
+
+### Aceite manual complementar do RF06
+
+No ambiente real, o responsável confirmou o projeto A com duas tarefas, uma concluída, e progresso de 50%. O projeto B tinha uma tarefa concluída e progresso de 100%. Ao alternar entre os projetos, os indicadores exibiram os valores correspondentes. Após excluir as tarefas dos dois projetos, ambos voltaram a 0%. Os projetos descartáveis foram excluídos e o projeto original **Teste DevFlow** foi preservado.
+
+A recarga da página e a atualização dos indicadores após edição pelo formulário têm evidência automatizada com API simulada. O aceite manual desses dois cenários aguarda confirmação explícita do responsável.
+
+O MVP está apto para entrega acadêmica no ambiente de referência. A regressão não identificou defeitos bloqueantes. As verificações locais de isolamento foram aproveitadas dos registros anteriores. O teste de isolamento a partir de outro dispositivo da rede permanece pendente.
+
 ## Matriz de cobertura
 
-| Requisito | Verificação |
-|---|---|
-| RF01 | CRUD de projeto pela API e interface, nome obrigatório, exclusão vazia e 409 com tarefas. |
-| RF02 | CRUD de tarefa, título obrigatório, lista por projeto, projeto inexistente e chave estrangeira. |
-| RF03 | Três prioridades, valor inválido e padrão `baixa`. |
-| RF04 | Três estados, padrão `a_fazer`, seis transições e persistência. |
-| RF05 | Ordem por posição e ID, padrão 0, rejeição de escrita pelo cliente e preservação ao mover. |
-| RF06 | Total, contagens por estado, barra acessível, arredondamento, projeto vazio, troca de projeto, recarga e atualização após cada operação aplicável. |
-| RNF01 | Versões, PHP/PDO sob Apache, aplicação do esquema no MariaDB e recarga no navegador. |
-| RNF02 | Validação no servidor, revisão da parametrização, acentos e renderização como texto. |
-| RNF03 | HTTP/HTTPS local e pela rede, caminhos privados, acesso ao banco e erros genéricos. |
-| RNF04 | Rótulo, teclado, foco e comunicação perceptível durante movimentação. |
-| RNF05 | Formato, campos, tipo de conteúdo, origem e ausência de escrita após rejeição. |
-| RNF06 | Falhas de gravação comunicadas com preservação do último estado confirmado. |
+| ID | Requisito | Evidência e situação |
+|---|---|---|
+| RF01 | CRUD de projetos | Contrato e integração aprovados na Sprint 07. O navegador já confirmou o CRUD. A integração verificou nome obrigatório, exclusão de projeto vazio e HTTP 409 com preservação do projeto e das tarefas. |
+| RF02 | CRUD de tarefas e vínculo obrigatório | Integração aprovada na Sprint 07. Lista restrita ao projeto, título obrigatório, HTTP 404 para projeto inexistente e rejeição de tarefa órfã. CRUD aceito no navegador na Sprint 04. |
+| RF03 | Prioridades | Persistência e contrato confirmaram `baixa`, `media` e `alta`, o padrão `baixa` e a rejeição de valores inválidos. Prioridades aceitas no navegador na Sprint 04. |
+| RF04 | Kanban e movimentação | Integração confirmou padrão `a_fazer`, seis transições e persistência em nova leitura. Kanban aceito com a API real na Sprint 05. As seis transições por teclado e recarga foram exercitadas com API simulada. |
+| RF05 | Ordenação determinística | Integração confirmou padrão 0, ordem por `posicao` e `id`, empate e preservação ao mover. O contrato rejeitou escrita de `posicao`. A ordem também foi conferida no navegador. |
+| RF06 | Indicadores de progresso | Aceite real confirmou contagens, movimentação, 67%, 100% e retorno a 0% na Sprint 06. A Sprint 07 confirmou 50%, 100%, alternância e retorno a 0% nos dois projetos. Recarga e atualização após edição pelo formulário têm evidência simulada, com confirmação manual pendente. A simulação também cobriu criação, arredondamento e acessibilidade da barra. |
+| RNF01 | Execução local no XAMPP | Ambiente de referência validado com PHP 8.2, PDO, MariaDB 10.4.32 e Bootstrap local. A Sprint 07 aprovou a persistência e as sondagens HTTP. Os aceites anteriores registraram recarga do CRUD. |
+| RNF02 | Validação, parametrização e renderização segura | Contratos e Unicode aprovados. A revisão confirmou parâmetros PDO e uso de `textContent`. A renderização literal foi exercitada na simulação. |
+| RNF03 | Isolamento e proteção de arquivos | Bloqueio do checkout em HTTP e HTTPS confirmado anteriormente. Escutas locais reconfirmadas na Sprint 07 e mensagens genéricas verificadas no código. Teste por outro dispositivo da rede pendente. |
+| RNF04 | Movimentação acessível | Rótulo, teclado, foco e mensagens verificados no Chrome com API simulada. O aceite do Kanban com API real foi registrado sem detalhamento individual desses controles. |
+| RNF05 | Proteção das escritas e contrato | Contratos confirmaram rejeição de origem, tipo de conteúdo e campos indevidos. A integração confirmou preservação dos dados após edição inválida. |
+| RNF06 | Preservação da interface diante de falhas | Com API simulada, as falhas de criação, edição, movimentação e exclusão comunicaram o erro e preservaram os indicadores e o quadro confirmado. |

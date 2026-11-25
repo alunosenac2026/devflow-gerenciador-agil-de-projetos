@@ -15,10 +15,11 @@ A configuração usa os módulos de autorização do Apache, `mod_rewrite` e `mo
 
 ## Estrutura e instalação em outra máquina
 
-1. Prepare um ambiente Windows com XAMPP. Use os valores verificados como referência e repita os testes na versão instalada.
+1. Prepare o Windows com XAMPP, PHP 8.2 e as extensões PDO, `pdo_mysql` e `mbstring`. Habilite os módulos do Apache indicados acima e reserve as portas locais 8082 para o Apache e 3307 para o banco dedicado.
 2. Defina a raiz do XAMPP, por exemplo `C:/xampp`, e obtenha o checkout do DevFlow. Nos blocos Apache abaixo, substitua `CAMINHO_DO_CHECKOUT` pelo caminho absoluto, com barras `/`. O checkout contém `public/`, `app/`, `config/`, `database/`, `docs/` e `tests/`. `var/log/` é local e ignorado pelo Git.
 3. Identifique os `DocumentRoot` e mapeamentos existentes, inclusive HTTP, HTTPS, aliases e caminhos que chegam ao checkout. Confirme a disponibilidade de `8082` antes de prosseguir. Registre o estado dos processos, portas e respostas dos projetos compartilhados que serão comparados.
 4. Identifique o arquivo principal efetivo. No layout de referência, ele fica em `<XAMPP>/apache/conf/httpd.conf` e os arquivos complementares ficam em `<XAMPP>/apache/conf/extra/`. Faça o backup descrito abaixo antes de editar.
+5. Antes de provisionar o banco do aplicativo, prepare uma instância dedicada MariaDB 10.4.32, com diretório de dados próprio, conta administrativa local e configuração independente. Confira o [destino exigido pelo provisionador](#persistência-na-instância-dedicada). Depois de configurar o VirtualHost e iniciar a instância, siga a instalação local para criar os bancos e as contas do DevFlow.
 
 ## VirtualHost dedicado
 
@@ -113,7 +114,9 @@ No host compartilhado, `/webalizer/` retornou 403 e `/examples` retornou 503. O 
 
 ## Persistência na instância dedicada
 
-O procedimento pressupõe uma instância dedicada já inicializada e uma conta administrativa local configurada. A instância do DevFlow usa `127.0.0.1:3307`. A porta `3306` pertence à instância compartilhada. Nos exemplos, ajuste a raiz do XAMPP para o executável PHP e os caminhos documentados conforme a instalação aprovada.
+Antes de rodar `database/provisionar.php`, a instância dedicada MariaDB 10.4.32 deve estar inicializada, com escuta em `127.0.0.1:3307`, named pipe desativado e a conta administrativa `root@127.0.0.1` configurada. A versão atual do provisionador exige o diretório de dados `C:/DevFlow-MariaDB-10.4/data`. O procedimento de partida abaixo usa um `my.ini` dedicado. Ajuste o caminho dos executáveis nos exemplos conforme a raiz do XAMPP instalada.
+
+O provisionador cria os bancos `devflow` e `devflow_test`, aplica o esquema, cria as contas restritas e gera os arquivos de configuração locais. A inicialização do servidor e das tabelas de sistema é uma etapa prévia de preparação do ambiente. Reserve os nomes dos bancos e das contas para a primeira instalação e mantenha a pasta `config/` com acesso restrito antes de gerar os arquivos locais.
 
 ### Partida e encerramento
 
